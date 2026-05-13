@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: sor_db
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=twoje_bezpieczne_haslo
+      - POSTGRES_DB=sor_system
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    networks:
+      - sor_network
+
+  backend:
+    build: ./backend
+    container_name: sor_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://admin:twoje_bezpieczne_haslo@db:5432/sor_system
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - sor_network
+
+networks:
+  sor_network:
+    driver: bridge

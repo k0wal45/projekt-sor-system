@@ -1,0 +1,16 @@
+# Dane z bazy danych
+data/
+db_data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+
+# Środowisko / Sekrety
+.env
+
+# Docker
+.docker/
