@@ -1,12 +1,35 @@
-FROM python:3.11-slim
+# Etap 1: Budowanie (Builder)
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
-# Instalacja zależności
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Kopiujemy pliki konfiguracyjne modułów
+COPY go.mod go.sum ./
+# Pobieramy zależności
+RUN go mod download
 
-# Kopiowanie kodu
+# Kopiujemy cały kod źródłowy
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Kompilujemy aplikację
+# CGO_ENABLED=0 gwarantuje, że plik binarny będzie w 100% statyczny
+# GOOS=linux kompiluje pod system Linux (format Dockera)
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+
+# Etap 2: Produkcja (Final Image)
+# Używamy najlżejszego możliwego obrazu
+FROM alpine:latest  
+
+WORKDIR /root/
+
+# Instalujemy certyfikaty SSL, przydatne gdy backend musi uderzać na zewnątrz (HTTPS)
+RUN apk --no-cache add ca-certificates
+
+# Kopiujemy gotowy plik binarny z pierwszego etapu
+COPY --from=builder /app/main .
+
+# Otwieramy port
+EXPOSE 8080
+
+# Uruchamiamy aplikację
+CMD ["./main"]

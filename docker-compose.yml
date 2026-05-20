@@ -18,10 +18,20 @@ services:
     restart: always
     environment:
       - DATABASE_URL=postgresql://admin:twoje_bezpieczne_haslo@db:5432/sor_system
+      - AI_SERVICE_URL=http://ai:8000/predict
     ports:
-      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - db
+    networks:
+      - sor_network
+
+  ai:
+    build: ./ai_service
+    container_name: sor_ai
+    restart: always
+    ports:
+      - "8001:8000"
     networks:
       - sor_network
 
