@@ -1,5 +1,5 @@
-# Etap 1: Budowanie (Builder)
-FROM golang:1.22-alpine AS builder
+﻿# Etap 1: Budowanie (Builder)
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 

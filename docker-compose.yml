@@ -1,4 +1,4 @@
-services:
+﻿services:
   db:
     image: postgres:15-alpine
     container_name: sor_db
@@ -31,7 +31,7 @@ services:
     container_name: sor_ai
     restart: always
     ports:
-      - "8001:8000"
+      - "3232:3232"
     networks:
       - sor_network
 
