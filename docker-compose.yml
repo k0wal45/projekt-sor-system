@@ -21,6 +21,7 @@ services:
     restart: always
     environment:
       - APP_ENV=${APP_ENV}
+      - IS_SERVER=${IS_SERVER}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
