@@ -1,51 +1,51 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-// DB to globalna zmienna, do której będziemy się odwoływać w kontrolerach
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	// 1. Pobranie zmiennych z systemu (wstrzykniętych przez plik .env w Dockerze)
-	dbURL := os.Getenv("DATABASE_URL")
 	appEnv := os.Getenv("APP_ENV")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	serverIP := os.Getenv("SERVER_IP")
+	isServer := os.Getenv("IS_SERVER")
 
-	if dbURL == "" {
-		log.Fatal("Błąd: Zmienna środowiskowa DATABASE_URL nie została ustawiona!")
+	if appEnv == "" {
+		appEnv = "development"
 	}
 
-	// 2. Konfiguracja loggera GORM w zależności od środowiska
+	dbHost := "db" 
+
+	if appEnv == "production" && isServer != "true" {
+		dbHost = serverIP
+		log.Printf("🔄 Przełączono źródło danych: %s wymusza połączenie z zewnętrznym serwerem (%s)", appEnv, dbHost)
+	}
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable", 
+		dbHost, user, password, dbname)
+
 	var gormConfig gorm.Config
 	if appEnv == "development" {
-		log.Println("🔧 Tryb deweloperski: Włączam szczegółowy logger SQL...")
-		gormConfig.Logger = logger.New(
-			log.New(os.Stdout, "\r\n", log.LstdFlags),
-			logger.Config{
-				SlowThreshold:             time.Second,
-				LogLevel:                  logger.Info, // Wypisuje wszystkie zapytania SQL
-				IgnoreRecordNotFoundError: true,
-				Colorful:                  true,
-			},
-		)
+		gormConfig.Logger = logger.Default.LogMode(logger.Info)
 	} else {
-		log.Println("🚀 Tryb produkcyjny: Logger SQL ograniczony do błędów.")
 		gormConfig.Logger = logger.Default.LogMode(logger.Error)
 	}
 
-	// 3. Nawiązanie połączenia
-	database, err := gorm.Open(postgres.Open(dbURL), &gormConfig)
+	database, err := gorm.Open(postgres.Open(dsn), &gormConfig)
 	if err != nil {
-		log.Fatalf("Nie udało się połączyć z bazą danych: %v", err)
+		log.Fatalf("Nie udało się połączyć z bazą (%s): %v", dbHost, err)
 	}
 
-	log.Println("✅ Połączenie z bazą danych PostgreSQL ustanowione pomyślnie!")
+	log.Printf("✅ Połączono pomyślnie ze środowiskiem [%s] na hoście: %s", appEnv, dbHost)
 	DB = database
 }
