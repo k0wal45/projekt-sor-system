@@ -28,6 +28,7 @@ RUN apk --no-cache add ca-certificates
 # Kopiujemy gotowy plik binarny z pierwszego etapu
 COPY --from=builder /app/main .
 
+
 # Otwieramy port
 EXPOSE 8080
 
