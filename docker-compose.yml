@@ -1,30 +1,4 @@
 services:
-  git-sync:
-    image: alpine/git:latest
-    container_name: sor_git_sync
-    volumes:
-      - .:/app
-    working_dir: /app
-    environment:
-      - GIT_USERNAME=${GIT_USERNAME}
-      - GIT_TOKEN=${GIT_TOKEN}
-    entrypoint: >
-      /bin/sh -c "
-      git config --global --add safe.directory /app;
-      while true; do
-        echo 'Sprawdzanie zmian na GitHub...';
-        # Użycie tokenu do autentykacji przy fetch/pull
-        git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/${GIT_USERNAME}/projekt-sor-system.git;
-        git fetch origin main;
-        LOCAL=\$$(git rev-parse HEAD);
-        REMOTE=\$$(git rev-parse @{u});
-        if [ \$$LOCAL != \$$REMOTE ]; then
-          echo 'Wykryto zmiany! Pobieranie nowego kodu...';
-          git pull origin main;
-        fi;
-        sleep 3600;
-      done"
-    restart: unless-stopped
   db:
     image: postgres:15-alpine
     container_name: sor_db
@@ -57,7 +31,7 @@ services:
     container_name: sor_ai
     restart: always
     ports:
-      - "3232:3232"
+      - "8001:8000"
     networks:
       - sor_network
 
