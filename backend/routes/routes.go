@@ -10,7 +10,7 @@ import (
 func SetupRouter(r *gin.Engine) {
 	
 	// Tworzymy główną grupę dla API (dobra praktyka to wersjonowanie)
-	api := r.Group("/api/v1")
+	api := r.Group("/api/")
 	{
 		// Grupa dla pacjentów (odpowiednik folderu /api/patients w Next)
 		patients := api.Group("/patients")
@@ -20,10 +20,6 @@ func SetupRouter(r *gin.Engine) {
 			// patients.GET("/:id", controllers.GetPatientByID)
 		}
 
-		// Grupa dla wizyt (sor_visits)
-		visits := api.Group("/visits")
-		{
-			visits.POST("/", controllers.CreateVisit) // Tutaj w przyszłości uderzymy do AI
-		}
+
 	}
 }

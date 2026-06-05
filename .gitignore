@@ -1,16 +1,88 @@
-# Dane z bazy danych
+# ==========================================
+# Dane z bazy danych & Logi kontenerów
+# ==========================================
 data/
 db_data/
+*.log
 
-# Python
+# ==========================================
+# Środowisko / Sekrety / Konfiguracja lokalna
+# ==========================================
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Docker
+# ==========================================
+.docker/
+
+# ==========================================
+# Go (Backend)
+# ==========================================
+# Pliki binarne i kompilaty
+bin/
+main
+esor-backend
+# Pliki crash dump
+*.out
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# ==========================================
+# Python (Sztuczna Inteligencja / ML)
+# ==========================================
 __pycache__/
 *.py[cod]
 *$py.class
 .venv/
 env/
+venv/
+ENV/
+# Duże pliki modeli (np. pliki wag sieci lub modele scikit-learn)
+*.pkl
+*.pth
+*.h5
+*.onnx
 
-# Środowisko / Sekrety
-.env
+# ==========================================
+# Mobile App (Uniwersalne śmieci dla Flutter/React Native/Native)
+# ==========================================
+# Node / React Native (jeśli używacie)
+node_modules/
+.npm
+package-lock.json
 
-# Docker
-.docker/
+# Flutter / Android / iOS (jeśli używacie)
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.apk
+*.aab
+*.app
+*.ipa
+
+# ==========================================
+# IDE / Edytory kodu (VS Code, GoLand, PyCharm)
+# ==========================================
+.vs/
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# ==========================================
+# Systemowe (Windows / macOS)
+# ==========================================
+Thumbs.db
+Db.DS_Store
+.DS_Store
