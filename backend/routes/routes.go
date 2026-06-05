@@ -1,4 +1,4 @@
-package routes
+﻿package routes
 
 import (
 	"esor-backend/controllers" // Importujesz swoje kontrolery
@@ -20,6 +20,10 @@ func SetupRouter(r *gin.Engine) {
 			// patients.GET("/:id", controllers.GetPatientByID)
 		}
 
-
+		// Grupa dla wizyt (sor_visits)
+		// visits := api.Group("/visits")
+		// {
+		// 	visits.POST("/", controllers.CreateVisit) // Tutaj w przyszłości uderzymy do AI
+		// }
 	}
 }
