@@ -20,6 +20,7 @@ Wymagany zainstalowany Docker oraz Docker Compose.
 git clone [URL_TWOJEGO_REPO]
 cd system-sor
 docker compose up -d --build
+```
 
 ## ⚙️ Backend
 
@@ -45,4 +46,3 @@ Backend został zaprojektowany w architekturze mikroserwisowej i napisany w jęz
 ### 🚀 Uruchomienie lokalne
 
 Aplikacja jest w pełni skonteneryzowana i nie wymaga instalacji środowiska Go na maszynie hosta. Aby uruchomić backend wraz z bazą danych i pozostałymi serwisami, wystarczy wykonać w głównym katalogu projektu polecenie:
-```
