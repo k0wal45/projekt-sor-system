@@ -4,9 +4,9 @@ services:
     container_name: sor_db
     restart: always
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=twoje_bezpieczne_haslo
-      - POSTGRES_DB=sor_system
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./data/db:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -18,8 +18,9 @@ services:
     container_name: sor_backend
     restart: always
     environment:
-      - DATABASE_URL=postgresql://admin:twoje_bezpieczne_haslo@db:5432/sor_system
-      - AI_SERVICE_URL=http://ai:8000/predict
+      - APP_ENV=${APP_ENV}
+      - DATABASE_URL=${DATABASE_URL}
+      - AI_SERVICE_URL=${AI_SERVICE_URL}
     ports:
       - "8080:8080"
     depends_on:

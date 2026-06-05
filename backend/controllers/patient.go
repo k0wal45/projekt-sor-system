@@ -1,14 +1,33 @@
 ﻿package controllers
 
-import "github.com/gin-gonic/gin"
+import (
+	"esor-backend/config"
+	"esor-backend/models"
+	"net/http"
+	"os"
 
-// To odpali się np. przy GET /api/patients
+	"github.com/gin-gonic/gin"
+)
+
 func GetPatients(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "Lista wszystkich pacjentów"})
-}
+	// 1. Pobieramy zmienną środowiskową, żeby sprawdzić na którym ENV działamy
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "" {
+		appEnv = "development"
+	}
 
-// To odpali się przy POST /api/patients
-func CreatePatient(c *gin.Context) {
-	// Tu w przyszłości odczytasz JSON i zapiszesz w GORM
-	c.JSON(201, gin.H{"message": "Dodano nowego pacjenta"})
+	// 2. Pobieramy listę pacjentów z bazy danych za pomocą GORM
+	var patients []models.Patient
+	result := config.DB.Find(&patients)
+	
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Nie udało się pobrać pacjentów: " + result.Error.Error(),
+		})
+		return
+	}
+
+	// 3. Zwracamy pacjentów w formacie JSON oraz dodajemy nagłówek z informacją o ENV dla testu
+	c.Header("X-App-Env", appEnv)
+	c.JSON(http.StatusOK, patients)
 }

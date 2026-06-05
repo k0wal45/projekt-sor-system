@@ -16,7 +16,6 @@ func SetupRouter(r *gin.Engine) {
 		patients := api.Group("/patients")
 		{
 			patients.GET("/", controllers.GetPatients)
-			patients.POST("/", controllers.CreatePatient)
 			// patients.GET("/:id", controllers.GetPatientByID)
 		}
 

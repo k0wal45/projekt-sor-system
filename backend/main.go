@@ -1,6 +1,7 @@
 package main
 
 import (
+	"esor-backend/config"
 	"esor-backend/routes"
 
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,7 @@ import (
 
 func main() {
 	// 1. Podłączenie do bazy (GORM)...
+	config.ConnectDatabase()
 	
 	// 2. Inicjalizacja Gina
 	r := gin.Default()
