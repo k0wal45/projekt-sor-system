@@ -10,7 +10,7 @@ import (
 func SetupRouter(r *gin.Engine) {
 	
 	// Tworzymy główną grupę dla API (dobra praktyka to wersjonowanie)
-	api := r.Group("/api/v1")
+	api := r.Group("/api/")
 	{
 		// Grupa dla pacjentów (odpowiednik folderu /api/patients w Next)
 		patients := api.Group("/patients")
