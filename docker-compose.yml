@@ -1,4 +1,4 @@
-services:
+﻿services:
   db:
     image: postgres:15-alpine
     container_name: sor_db
@@ -16,7 +16,7 @@ services:
       - sor_network
 
   backend:
-    build: ./backend
+    image: ghcr.io/mateuszhubczy/system-sor-backend:latest
     container_name: sor_backend
     restart: always
     environment:
@@ -34,13 +34,31 @@ services:
       - sor_network
 
   ai:
-    build: ./ai_service
+    image: ghcr.io/mateuszhubczy/system-sor-ai:latest
     container_name: sor_ai
     restart: always
     ports:
       - "8001:8000"
     networks:
       - sor_network
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: sor_watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      - WATCHTOWER_REVIVE_STOPPED=false
+
+      - COMPOSE_API_VERSION=1.43
+      - DOCKER_API_VERSION=1.43
+    networks:
+      - sor_network
+    command: sor_backend sor_ai
 
 networks:
   sor_network:
