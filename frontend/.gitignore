@@ -45,3 +45,4 @@ app.*.map.json
 /android/app/release
 
 README_AI.md
+ai-context/
