@@ -1,28 +1,35 @@
 ﻿package routes
 
 import (
-	"esor-backend/controllers" // Importujesz swoje kontrolery
+	"esor-backend/controllers"
+	"esor-backend/middleware" // <-- Importujemy nasz nowy middleware
 
 	"github.com/gin-gonic/gin"
 )
 
-// SetupRouter konfiguruje wszystkie endpointy
 func SetupRouter(r *gin.Engine) {
 	
-	// Tworzymy główną grupę dla API (dobra praktyka to wersjonowanie)
-	api := r.Group("/api/")
+	api := r.Group("/api")
 	{
-		// Grupa dla pacjentów (odpowiednik folderu /api/patients w Next)
-		patients := api.Group("/patients")
+		// 1. TRASY OTWARTE (Publiczne / Autoryzacja)
+		auth := api.Group("/auth")
 		{
-			patients.GET("/", controllers.GetPatients)
-			// patients.GET("/:id", controllers.GetPatientByID)
+			auth.POST("/register", controllers.RegisterStaff)
+			auth.POST("/login", controllers.LoginStaff)
 		}
 
-		// Grupa dla wizyt (sor_visits)
-		// visits := api.Group("/visits")
-		// {
-		// 	visits.POST("/", controllers.CreateVisit) // Tutaj w przyszłości uderzymy do AI
-		// }
+		// 2. TRASY ZABEZPIECZONE (Wymagają zalogowania - tokenu JWT)
+		protected := api.Group("/")
+		protected.Use(middleware.AuthMiddleware()) // Każda trasa poniżej przechodzi przez weryfikację tokenu
+		{
+			protected.GET("/auth/me", controllers.GetMe)
+
+			// Moduł Pacjentów (CRUD podstawowy)
+			protected.POST("/patients", controllers.CreatePatient)
+			protected.GET("/patients", controllers.GetPatients)
+			protected.GET("/patients/:pesel", controllers.GetPatientByPesel)
+			protected.PUT("/patients/:pesel", controllers.UpdatePatient)
+			protected.DELETE("/patients/:pesel", controllers.DeletePatient)
+		}
 	}
 }
