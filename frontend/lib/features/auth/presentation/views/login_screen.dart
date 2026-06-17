@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../viewmodels/auth_viewmodel.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -41,7 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
-        // context.go('/dashboard');
+        context.go('/');
       }
     });
 

@@ -13,12 +13,13 @@ void main() {
   );
 }
 
-class ESorApp extends StatelessWidget {
+class ESorApp extends ConsumerWidget {
   const ESorApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = GoogleFonts.robotoTextTheme(Theme.of(context).textTheme);
+    final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       title: 'E-SOR',
@@ -27,7 +28,7 @@ class ESorApp extends StatelessWidget {
         textTheme: textTheme,
         useMaterial3: true,
       ),
-      routerConfig: appRouter,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
     );
   }
