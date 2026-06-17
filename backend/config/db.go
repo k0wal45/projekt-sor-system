@@ -1,4 +1,4 @@
-package config
+﻿package config
 
 import (
 	"esor-backend/models"
@@ -54,9 +54,40 @@ func ConnectDatabase() {
 	enumErr := DB.Exec(`
 		DO $$ 
 		BEGIN 
+			-- 1. Rola personelu medycznego
 			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'role_enum') THEN 
 				CREATE TYPE role_enum AS ENUM ('PIELEGNIARZ', 'RATOWNIK', 'LEKARZ', 'ADMIN'); 
-			END IF; 
+			END IF;
+			
+			-- 2. Status przyjęcia na SOR
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'admission_status_enum') THEN 
+				CREATE TYPE admission_status_enum AS ENUM ('W_POCZEKALNI', 'W_GABINECIE', 'OCZEKUJE_NA_WYNIKI', 'ZAKONCZONE'); 
+			END IF;
+
+			-- 3. Płeć pacjenta
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender_enum') THEN 
+				CREATE TYPE gender_enum AS ENUM ('M', 'K', 'INNY'); 
+			END IF;
+
+			-- 4. Grupa krwi pacjenta
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'blood_group_enum') THEN 
+				CREATE TYPE blood_group_enum AS ENUM ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', '0+', '0-'); 
+			END IF;
+
+			-- 5. Decyzja o postępowaniu
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'discharge_decision_enum') THEN 
+				CREATE TYPE discharge_decision_enum AS ENUM ('DO_DOMU', 'NA_ODDZIAL', 'OIOM', 'ZGON'); 
+			END IF;
+
+			-- 6. Typ zleconego badania
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_type_enum') THEN 
+				CREATE TYPE order_type_enum AS ENUM ('KREW', 'RTG', 'TK', 'USG', 'EKG', 'INNE'); 
+			END IF;
+
+			-- 7. Status zlecenia
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status_enum') THEN 
+				CREATE TYPE order_status_enum AS ENUM ('ZLECONE', 'W_TRAKCIE', 'WYNIK_GOTOWY'); 
+			END IF;
 		END $$;
 	`).Error
 
@@ -65,7 +96,13 @@ func ConnectDatabase() {
 	}
 
 	log.Println("🚀 Uruchamianie Auto-Migracji GORM...")
-	migrateErr := DB.AutoMigrate(&models.Staff{})
+	migrateErr := DB.AutoMigrate(
+		&models.Staff{}, 
+		&models.Patient{}, 
+		&models.Admission{},
+		&models.Consultation{},
+		&models.DiagnosticOrder{},
+	)
 	if migrateErr != nil {
 		log.Fatalf("Błąd podczas automatycznej migracji bazy danych: %v", migrateErr)
 	}

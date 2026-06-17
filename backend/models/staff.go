@@ -1,4 +1,4 @@
-package models
+﻿package models
 
 import (
 	"time"
@@ -14,14 +14,14 @@ const (
 )
 
 type Staff struct {
-	ID            uint      `gorm:"primaryKey;autoIncrement"`
-	FirstName     string    `gorm:"type:varchar(50);not null"`
-	LastName      string    `gorm:"type:varchar(50);not null"`
-	AcademicTitle string    `gorm:"type:varchar(30)"`
-	Role          Role      `gorm:"type:role_enum;not null"`
-	LoginEmail    string    `gorm:"type:varchar(100);unique;not null"`
-	PasswordHash  string    `gorm:"type:varchar(255);not null"`
-	CreatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	ID            uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	FirstName     string    `gorm:"type:varchar(50);not null" json:"first_name"`
+	LastName      string    `gorm:"type:varchar(50);not null" json:"last_name"`
+	AcademicTitle string    `gorm:"type:varchar(30)" json:"academic_title"`
+	Role          Role      `gorm:"type:role_enum;not null" json:"role"`
+	LoginEmail    string    `gorm:"type:varchar(100);unique;not null" json:"login_email"`
+	PasswordHash  string    `gorm:"type:varchar(255);not null" json:"-"`
+	CreatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 }
 
 func (Staff) TableName() string {
