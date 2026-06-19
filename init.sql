@@ -9,6 +9,10 @@ CREATE TYPE discharge_decision_enum AS ENUM ('DO_DOMU', 'NA_ODDZIAL', 'OIOM', 'Z
 CREATE TYPE order_type_enum AS ENUM ('KREW', 'RTG', 'TK', 'USG', 'EKG', 'INNE');
 CREATE TYPE order_status_enum AS ENUM ('ZLECONE', 'W_TRAKCIE', 'WYNIK_GOTOWY');
 
+-- Nowe ENUM-y dla zaktualizowanego procesu Triage/Admissions:
+CREATE TYPE arrival_mode_enum AS ENUM ('Pieszo', 'Karetka publiczna', 'Pojazd prywatny', 'Karetka prywatna', 'Inne');
+CREATE TYPE mental_status_enum AS ENUM ('W pełni świadomy', 'Reaguje na głos', 'Reaguje tylko na ból', 'Nieprzytomny/Brak reakcji');
+
 -- =========================================================================
 -- 2. TWORZENIE TABEL (W kolejności uwzględniającej klucze obce)
 -- =========================================================================
@@ -44,35 +48,36 @@ CREATE TABLE staff (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela 3: Przyjęcie na SOR (Admissions)
+-- Tabela 3: Przyjęcie na SOR (Admissions) - ZAKTUALIZOWANA
 CREATE TABLE admissions (
     id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE RESTRICT,
-    triage_staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE RESTRICT,
-    attending_doctor_id INTEGER REFERENCES staff(id) ON DELETE SET NULL, -- Domyślnie NULL, dopóki lekarz nie przejmie pacjenta
-    admission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    arrival_mode VARCHAR(100) NOT NULL, -- np. "ZRM", "Własny"
-    injuries TEXT,
-    mental_status VARCHAR(100), -- np. "Zorientowany", "Splątany"
-    pain_lvl INTEGER CHECK (pain_lvl >= 0 AND pain_lvl <= 10), -- skala NRS 0-10
+    id_pacjenta INTEGER NOT NULL REFERENCES patients(id) ON DELETE RESTRICT,
+    id_osoby_przyjmujacej INTEGER NOT NULL REFERENCES staff(id) ON DELETE RESTRICT,
+    id_lekarza_prowadzacego INTEGER REFERENCES staff(id) ON DELETE SET NULL DEFAULT NULL,
+    data_przyjecia TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    forma_przybycia arrival_mode_enum NOT NULL,
+    injury BOOLEAN NOT NULL DEFAULT FALSE,
+    mental_status mental_status_enum NOT NULL,
+    pain BOOLEAN NOT NULL DEFAULT FALSE,
+    pain_lvl INTEGER NOT NULL CHECK (pain_lvl >= 0 AND pain_lvl <= 10), -- skala NRS 0-10
     
-    -- Parametry życiowe
+    -- Parametry życiowe (Wartości numeryczne)
     hr INTEGER NOT NULL,          -- Heart Rate (tętno)
     sbp INTEGER NOT NULL,         -- Systolic Blood Pressure (skurczowe)
     dbp INTEGER NOT NULL,         -- Diastolic Blood Pressure (rozkurczowe)
     rr INTEGER NOT NULL,          -- Respiratory Rate (częstość oddechów)
-    bt DECIMAL(3,1) NOT NULL,     -- Body Temperature (temperatura)
+    bt NUMERIC(3,1) NOT NULL,     -- Body Temperature (temperatura, np. 36.6)
     
     chief_complaint TEXT NOT NULL,
-    priority_ktas INTEGER CHECK (priority_ktas >= 1 AND priority_ktas <= 5),
+    priority_ktas INTEGER NOT NULL CHECK (priority_ktas >= 1 AND priority_ktas <= 5),
     is_ai_predicted BOOLEAN DEFAULT FALSE,
-    status_admission admission_status_enum DEFAULT 'W_POCZEKALNI'
+    status_przyjecia admission_status_enum DEFAULT 'W_POCZEKALNI'
 );
 
 -- Tabela 4: Konsultacja Lekarska (Consultations)
 CREATE TABLE consultations (
     id SERIAL PRIMARY KEY,
-    admission_id INTEGER UNIQUE NOT NULL REFERENCES admissions(id) ON DELETE CASCADE, -- Relacja 1-do-1 (jedna karta na jedno przyjęcie)
+    admission_id INTEGER UNIQUE NOT NULL REFERENCES admissions(id) ON DELETE CASCADE, -- Relacja 1-do-1
     medical_history TEXT NOT NULL,
     diagnosis TEXT NOT NULL,
     discharge_decision discharge_decision_enum NOT NULL,
@@ -88,3 +93,9 @@ CREATE TABLE diagnostic_orders (
     order_status order_status_enum DEFAULT 'ZLECONE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =========================================================================
+-- 3. INDEKSY OPTYMALIZACYJNE
+-- =========================================================================
+CREATE INDEX idx_admissions_status_przyjecia ON admissions(status_przyjecia);
+CREATE INDEX idx_admissions_priority_ktas ON admissions(priority_ktas);
