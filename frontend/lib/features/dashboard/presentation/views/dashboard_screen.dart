@@ -1,7 +1,7 @@
+import 'package:esor/features/auth/presentation/view_models/auth_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/domain/models/staff.dart';
-import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import 'nurse_dashboard_view.dart';
 import 'doctor_dashboard_view.dart';
@@ -11,7 +11,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authViewModelProvider);
+    final authState = ref.watch(authProvider);
     final dashboardState = ref.watch(dashboardViewModelProvider);
 
     final staff = authState.value;
@@ -22,21 +22,30 @@ class DashboardScreen extends ConsumerWidget {
 
     return dashboardState.when(
       data: (state) {
-        if (staff.role == StaffRole.doctor) {
+        if (staff.role == "LEKRARZ") {
           return DoctorDashboardView(
-            staff: staff,
+            staff: Staff(
+              id: staff.id.toString(),
+              firstName: staff.firstName,
+              lastName: staff.lastName,
+              role: StaffRole.doctor,
+              loginEmail: staff.email,
+            ),
             queue: state.queue,
             activePatients: state.activePatients,
-            onRefresh: () => ref.read(dashboardViewModelProvider.notifier).refresh(),
+            onRefresh: () =>
+                ref.read(dashboardViewModelProvider.notifier).refresh(),
           );
         } else {
           return NurseDashboardView(
             queue: state.queue,
-            onRefresh: () => ref.read(dashboardViewModelProvider.notifier).refresh(),
+            onRefresh: () =>
+                ref.read(dashboardViewModelProvider.notifier).refresh(),
           );
         }
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, stack) => Scaffold(
         body: Center(
           child: Column(
@@ -45,7 +54,8 @@ class DashboardScreen extends ConsumerWidget {
               Text('Wystąpił błąd: $error'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.read(dashboardViewModelProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(dashboardViewModelProvider.notifier).refresh(),
                 child: const Text('Spróbuj ponownie'),
               ),
             ],
