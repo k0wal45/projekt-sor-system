@@ -12,15 +12,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard E-SOR'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              ref.read(authViewModelProvider.notifier).logout();
-            },
-          ),
-        ],
+        title: const Text('Kolejka (Triage)'),
       ),
       body: authState.when(
         data: (user) => Center(
@@ -28,7 +20,7 @@ class DashboardScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Witaj w panelu głównym!',
+                'Placeholder dla kolejki pacjentów',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 16),
