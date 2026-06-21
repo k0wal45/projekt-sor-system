@@ -1,11 +1,6 @@
 class EnvConstants {
   static const String apiUrl = String.fromEnvironment(
-    'API_URL',
-    defaultValue: 'http://localhost:8080/api',
-  );
-  
-  static const String wsUrl = String.fromEnvironment(
-    'WS_URL',
-    defaultValue: 'ws://localhost:8080/api/ws',
+    'API_BASE_URL',
+    defaultValue: 'http://100.114.242.128:8080/api/',
   );
 }
