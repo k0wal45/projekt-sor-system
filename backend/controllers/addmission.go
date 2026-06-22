@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"errors"
 	"esor-backend/config"
 	"esor-backend/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // TriageInput reprezentuje strukturę danych wejściowych z Fluttera do zapisu karty przyjęcia
@@ -28,8 +30,8 @@ type TriageInput struct {
 
 // POST /api/admissions/predict-ktas
 // Wstępna ocena stanu pacjenta przez algorytm / model AI
+// POST /api/admissions/predict-ktas
 func PredictKtas(c *gin.Context) {
-	// Struktura lokalna bez pola priority_ktas, zapobiegająca błędom walidacji braku priorytetu
 	var input struct {
 		PatientID      uint                `json:"id_pacjenta" binding:"required"`
 		ArrivalMode    models.ArrivalMode  `json:"forma_przybycia" binding:"required"`
@@ -47,17 +49,40 @@ func PredictKtas(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Błąd walidacji danych wejściowych do Triage: " + err.Error()})
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := make(map[string]string)
+			for _, fe := range ve {
+				// fe.Field() domyślnie zwraca nazwę pola ze struktury Go (np. PatientID). 
+				// Generujemy czytelny komunikat na podstawie niespełnionego warunku (Tag):
+				switch fe.Tag() {
+				case "required":
+					out[fe.Field()] = "To pole jest wymagane."
+				case "min", "max":
+					out[fe.Field()] = "Wartość wykracza poza dozwolony zakres."
+				default:
+					out[fe.Field()] = "Nieprawidłowa wartość (błąd: " + fe.Tag() + ")."
+				}
+			}
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":   "Błąd walidacji danych wejściowych",
+				"details": out,
+			})
+			return
+		}
+
+		// Jeśli błąd to nie walidacja tagów, a np. uszkodzony/nieparsowalny JSON (malformed JSON)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Niepoprawny format dokumentu JSON: " + err.Error()})
 		return
 	}
 
 	// Heurystyka ratunkowa (mock przed spięciem HTTP z kontenerem AI w Pythonie)
-	suggestedKtas := 3 // Domyślnie kod żółty (pilny)
+	suggestedKtas := 3
 
 	if input.MentalStatus == models.MentalNieprzytomny || input.HR > 130 || input.SBP < 90 {
-		suggestedKtas = 1 // Kod czerwony (krytyczny, natychmiastowa reanimacja)
+		suggestedKtas = 1
 	} else if input.PainLvl >= 8 || input.SBP > 180 {
-		suggestedKtas = 2 // Kod pomarańczowy (bardzo pilny)
+		suggestedKtas = 2
 	}
 
 	c.JSON(http.StatusOK, gin.H{
