@@ -8,11 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TriageInput reprezentuje strukturę danych wejściowych z Fluttera
+// TriageInput reprezentuje strukturę danych wejściowych z Fluttera do zapisu karty przyjęcia
 type TriageInput struct {
 	PatientID      uint                `json:"id_pacjenta" binding:"required"`
 	ArrivalMode    models.ArrivalMode  `json:"forma_przybycia" binding:"required"`
-	Injury         bool                `json:"injury"` // Brak binding:"required", aby false nie wywalało walidacji
+	Injury         bool                `json:"injury"`
 	MentalStatus   models.MentalStatus `json:"mental_status" binding:"required"`
 	Pain           bool                `json:"pain"`
 	PainLvl        int                 `json:"pain_lvl" binding:"min=0,max=10"`
@@ -29,9 +29,25 @@ type TriageInput struct {
 // POST /api/admissions/predict-ktas
 // Wstępna ocena stanu pacjenta przez algorytm / model AI
 func PredictKtas(c *gin.Context) {
-	var input TriageInput
+	// Struktura lokalna bez pola priority_ktas, zapobiegająca błędom walidacji braku priorytetu
+	var input struct {
+		PatientID      uint                `json:"id_pacjenta" binding:"required"`
+		ArrivalMode    models.ArrivalMode  `json:"forma_przybycia" binding:"required"`
+		Injury         bool                `json:"injury"`
+		MentalStatus   models.MentalStatus `json:"mental_status" binding:"required"`
+		Pain           bool                `json:"pain"`
+		PainLvl        int                 `json:"pain_lvl" binding:"min=0,max=10"`
+		HR             int                 `json:"hr" binding:"required"`
+		SBP            int                 `json:"sbp" binding:"required"`
+		DBP            int                 `json:"dbp" binding:"required"`
+		RR             int                 `json:"rr" binding:"required"`
+		BT             float64             `json:"bt" binding:"required"`
+		ChiefComplaint string              `json:"chief_complaint" binding:"required"`
+		IsAiPredicted  bool                `json:"is_ai_predicted"`
+	}
+
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Błąd walidacji danych wejściowych do Triage"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Błąd walidacji danych wejściowych do Triage: " + err.Error()})
 		return
 	}
 
@@ -86,7 +102,7 @@ func CreateAdmission(c *gin.Context) {
 		StatusAdmission: models.StatusWPoczekalni, // Pacjent ląduje w kolejce oczekujących
 	}
 
-	// ROZWIĄZANIE: Omit wycina próby automatycznego mapowania asocjacji przez GORM, co blokuje powstawanie "patient_id"
+	// Omit wycina próby automatycznego mapowania asocjacji przez GORM, co blokuje powstawanie błędnych kolumn
 	if err := config.DB.Omit("Patient", "TriageStaff", "AttendingDoctor").Create(&newAdmission).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd zapisu karty przyjęcia do bazy danych: " + err.Error()})
 		return
@@ -208,8 +224,8 @@ func UpdateAdmissionStatus(c *gin.Context) {
 	}
 
 	validStatuses := map[string]bool{
-		"W_POCZEKALNI":        true,
-		"W_GABINECIE":         true,
+		"W_POCZEKALNI":       true,
+		"W_GABINECIE":        true,
 		"OCZEKUJE_NA_WYNIKI": true,
 		"ZAKONCZONE":          true,
 	}
@@ -225,7 +241,6 @@ func UpdateAdmissionStatus(c *gin.Context) {
 		return
 	}
 
-	// Aktualizacja wartości bezpośrednio w bazie oraz w strukturze lokalnej
 	if err := config.DB.Model(&admission).Update("status_przyjecia", input.Status).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd podczas aktualizacji statusu w bazie danych"})
 		return
