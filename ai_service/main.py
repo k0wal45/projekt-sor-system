@@ -1,7 +1,32 @@
-﻿from fastapi import FastAPI, HTTPException
+﻿import sys
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+import pickle 
+
+# Importujemy struktury z Twojego pliku tree_classes
+import tree_classes
+
+# --- FIX DLA UVICORNA W DOCKERZE (ZANIM KOD FUNKCJI SIĘ URUCHOMI) ---
+# Wskazujemy pickle'owi, że klasy z '__main__' to w rzeczywistości klasy z tree_classes
+sys.modules['__main__'].DecisionTreeClassifierRaw = tree_classes.DecisionTreeClassifierRaw
+sys.modules['__main__'].DecisionNode = tree_classes.DecisionNode
+# ------------------------------------------------------------------
 
 app = FastAPI()
+
+# --- BEZPIECZNE ŁADOWANIE MODELU RAZ PRZY STARCIE KONTENERA ---
+MODEL_PATH = "drzewo_model.pickle"
+try:
+    with open(MODEL_PATH, 'rb') as file:
+        modelAI = pickle.load(file)
+    print(f"[SUKCES] Model {MODEL_PATH} został pomyślnie wczytany do pamięci RAM.")
+except FileNotFoundError:
+    print(f"[BŁĄD KRYTYCZNY] Nie znaleziono pliku {MODEL_PATH} w kontenerze!")
+    modelAI = None
+except Exception as e:
+    print(f"[BŁĄD KRYTYCZNY] Podczas ładowania modelu wystąpił błąd: {str(e)}")
+    modelAI = None
+
 
 # 1. Definiujemy model danych pacjenta trafiających z backendu
 class TriageRequest(BaseModel):
@@ -18,33 +43,38 @@ class TriageResponse(BaseModel):
 # Endpoint testowy
 @app.get("/")
 def read_root():
-    return {"messege": "Hello SOR"}
+    return {"message": "Hellooooo SOR"}
 
 # 2. Główny endpoint do obliczania Triage
 @app.post("/api/triage", response_model=TriageResponse)
 def calculate_triage(patient_data: TriageRequest):
+    # Sprawdzamy, czy model poprawnie wczytał się na starcie kontenera
+    if modelAI is None:
+        raise HTTPException(
+            status_code=503, 
+            detail="Model AI jest niedostępny (błąd konfiguracji pliku .pickle na serwerze)."
+        )
+
     try:
-        # --- MIEJSCE NA MODEL AI ---
-        # features = [[patient_data.age, patient_data.hr, ...]]
-        # prediction = AI_model.predict(features)
+        # Przygotowanie cech do predykcji
+        features = [[
+            patient_data.age, 
+            patient_data.hr, 
+            patient_data.sbp, 
+            patient_data.dbp, 
+            patient_data.pain_lvl
+        ]]
         
-        # Tymczasowa, przejrzysta logika algorytmu Triage (jako silnik regułowy):
-        priority_level = 4
-
-        # Skrajne tętno -> (Natychmiastowa pomoc)
-        if  patient_data.hr > 140:
-            priority_level = 1
-            
-        # Bardzo niska saturacja ale stabilne tętno -> (Bardzo pilny)
-        elif 90 <= patient_data.age and  patient_data.sbp > 200:
-            priority_level = 2
-
-        # Silny ból lub wysokie ciśnienie -> (Pilny)
-        elif patient_data.pain_lvl >= 8 or patient_data.sbp > 180:
-            priority_level = 3
-
-
-        return TriageResponse(priority_level=priority_level)
+        # Wykonanie predykcji
+        prediction = modelAI.predict(features)
+        
+        # Konwersja wyniku na typ int
+        result_priority = int(float(prediction[0]))
+        
+        return TriageResponse(priority_level=result_priority)
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd wewnętrzny modelu AI: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Błąd wewnętrzny podczas przetwarzania przez model AI: {str(e)}"
+        )
