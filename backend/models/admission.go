@@ -31,20 +31,21 @@ const (
 )
 
 // Admission odzwierciedla zaktualizowaną tabelę "admissions"
+// Admission odzwierciedla zaktualizowaną tabelę "admissions"
 type Admission struct {
 	ID                  uint            `gorm:"primaryKey;column:id" json:"id"`
 	
-	// Powiązanie z Pacjentem
+	// Powiązanie z Pacjentem (Kluczowe: dodajemy column:id_pacjenta)
 	PatientID           uint            `gorm:"column:id_pacjenta;not null" json:"id_pacjenta"`
-	Patient             Patient         `gorm:"foreignKey:PatientID;references:ID;constraint:OnDelete:RESTRICT" json:"-"`
+	Patient             Patient         `gorm:"foreignKey:PatientID;references:ID" json:"-"`
 	
-	// Powiązanie z Osobą Przyjmującą (Staff)
+	// Powiązanie z Osobą Przyjmującą (Kluczowe: column:id_osoby_przyjmujacej)
 	TriageStaffID       uint            `gorm:"column:id_osoby_przyjmujacej;not null" json:"id_osoby_przyjmujacej"`
-	TriageStaff         Staff           `gorm:"foreignKey:TriageStaffID;references:ID;constraint:OnDelete:RESTRICT" json:"-"`
+	TriageStaff         Staff           `gorm:"foreignKey:TriageStaffID;references:ID" json:"-"`
 	
 	// Powiązanie z Lekarzem (Opcjonalne)
 	AttendingDoctorID   *uint           `gorm:"column:id_lekarza_prowadzacego;default:NULL" json:"id_lekarza_prowadzacego"`
-	AttendingDoctor     *Staff          `gorm:"foreignKey:AttendingDoctorID;references:ID;constraint:OnDelete:SET NULL" json:"-"`
+	AttendingDoctor     *Staff          `gorm:"foreignKey:AttendingDoctorID;references:ID" json:"-"`
 	
 	AdmissionTime       time.Time       `gorm:"column:data_przyjecia;default:CURRENT_TIMESTAMP" json:"data_przyjecia"`
 	ArrivalMode         ArrivalMode     `gorm:"type:arrival_mode_enum;column:forma_przybycia;not null" json:"forma_przybycia"`

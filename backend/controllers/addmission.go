@@ -8,11 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TriageInput reprezentuje zaktualizowaną strukturę danych wejściowych z Fluttera
+// TriageInput reprezentuje strukturę danych wejściowych z Fluttera
 type TriageInput struct {
 	PatientID      uint                `json:"id_pacjenta" binding:"required"`
 	ArrivalMode    models.ArrivalMode  `json:"forma_przybycia" binding:"required"`
-	Injury         bool                `json:"injury"` // bool nie może mieć binding:"required", bo false wywali walidację
+	Injury         bool                `json:"injury"` // Brak binding:"required", aby false nie wywalało walidacji
 	MentalStatus   models.MentalStatus `json:"mental_status" binding:"required"`
 	Pain           bool                `json:"pain"`
 	PainLvl        int                 `json:"pain_lvl" binding:"min=0,max=10"`
@@ -68,29 +68,32 @@ func CreateAdmission(c *gin.Context) {
 
 	// Budowanie modelu bazy danych
 	newAdmission := models.Admission{
-		PatientID:         input.PatientID,
-		TriageStaffID:     triageStaffID.(uint),
-		ArrivalMode:       input.ArrivalMode,
-		Injury:            input.Injury,
-		MentalStatus:      input.MentalStatus,
-		Pain:              input.Pain,
-		PainLvl:           input.PainLvl,
-		HR:                input.HR,
-		SBP:               input.SBP,
-		DBP:               input.DBP,
-		RR:                input.RR,
-		BT:                input.BT,
-		ChiefComplaint:    input.ChiefComplaint,
-		PriorityKtas:      input.PriorityKtas,
-		IsAiPredicted:     input.IsAiPredicted,
-		StatusAdmission:   models.StatusWPoczekalni, // Pacjent ląduje w kolejce oczekujących
+		PatientID:       input.PatientID,
+		TriageStaffID:   triageStaffID.(uint),
+		ArrivalMode:     input.ArrivalMode,
+		Injury:          input.Injury,
+		MentalStatus:    input.MentalStatus,
+		Pain:            input.Pain,
+		PainLvl:         input.PainLvl,
+		HR:              input.HR,
+		SBP:             input.SBP,
+		DBP:             input.DBP,
+		RR:              input.RR,
+		BT:              input.BT,
+		ChiefComplaint:  input.ChiefComplaint,
+		PriorityKtas:    input.PriorityKtas,
+		IsAiPredicted:   input.IsAiPredicted,
+		StatusAdmission: models.StatusWPoczekalni, // Pacjent ląduje w kolejce oczekujących
 	}
 
-	if err := config.DB.Create(&newAdmission).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd zapisu karty przyjęcia do bazy danych"})
+	// ROZWIĄZANIE: Omit wycina próby automatycznego mapowania asocjacji przez GORM, co blokuje powstawanie "patient_id"
+	if err := config.DB.Omit("Patient", "TriageStaff", "AttendingDoctor").Create(&newAdmission).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd zapisu karty przyjęcia do bazy danych: " + err.Error()})
 		return
 	}
+
 	go BroadcastQueue()
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message":   "Pacjent zarejestrowany na oddziale i dodany do kolejki",
 		"admission": newAdmission,
@@ -99,7 +102,6 @@ func CreateAdmission(c *gin.Context) {
 
 // GET /api/admissions/queue
 // Pobranie pacjentów oczekujących w poczekalni (Kolejka Główna)
-// Sortowanie: Od najwyższego priorytetu KTAS (1 -> 5), a w obrębie tego samego kodu według czasu zapisu (FIFO)
 func GetQueue(c *gin.Context) {
 	var queue []models.Admission
 
@@ -187,6 +189,7 @@ func CancelAdmission(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Nie udało się anulować przyjęcia"})
 		return
 	}
+
 	go BroadcastQueue()
 	c.JSON(http.StatusOK, gin.H{"message": "Karta przyjęcia została usunięta z systemu"})
 }
@@ -216,13 +219,13 @@ func UpdateAdmissionStatus(c *gin.Context) {
 		return
 	}
 
-	// Aktualizacja w bazie danych
 	var admission models.Admission
 	if err := config.DB.First(&admission, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Nie znaleziono karty przyjęcia o podanym ID"})
 		return
 	}
 
+	// Aktualizacja wartości bezpośrednio w bazie oraz w strukturze lokalnej
 	if err := config.DB.Model(&admission).Update("status_przyjecia", input.Status).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd podczas aktualizacji statusu w bazie danych"})
 		return
@@ -232,6 +235,6 @@ func UpdateAdmissionStatus(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Status przyjęcia został pomyślnie zaktualizowany",
-		"status":  admission.StatusAdmission,
+		"status":  input.Status,
 	})
 }
