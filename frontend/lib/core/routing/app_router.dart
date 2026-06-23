@@ -26,21 +26,31 @@ final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(
   debugLabel: 'shellSettings',
 );
 
-@riverpod
+class _AuthChangeNotifier extends ChangeNotifier {
+  _AuthChangeNotifier(Ref ref) {
+    ref.listen(authViewModelProvider, (_, _) {
+      notifyListeners();
+    });
+  }
+}
+
+@Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  final authState = ref.watch(authViewModelProvider);
+  final authChangeNotifier = _AuthChangeNotifier(ref);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
+    refreshListenable: authChangeNotifier,
     redirect: (context, state) {
+      final authState = ref.read(authViewModelProvider);
       final isAuthLoading = authState.isLoading;
       final isAuthenticated = authState.hasValue && authState.value != null;
       final isLoggingIn = state.matchedLocation == '/login';
       final isTvBoard = state.matchedLocation == '/tv-board';
 
       if (isTvBoard) {
-        return null; // Public route
+        return null;
       }
 
       if (isAuthLoading) {
@@ -65,11 +75,6 @@ GoRouter appRouter(Ref ref) {
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          if (authState.isLoading) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
           return MainShellScreen(navigationShell: navigationShell);
         },
         branches: [
@@ -119,19 +124,19 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
       GoRoute(
-        path: '/patient-form/:mode',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final modeStr = state.pathParameters['mode']!;
-          return PatientFormScreen(mode: modeStr);
-        },
-      ),
-      GoRoute(
         path: '/patient-form/view/:pesel',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final pesel = state.pathParameters['pesel']!;
           return PatientFormScreen(mode: 'view', pesel: pesel);
+        },
+      ),
+      GoRoute(
+        path: '/patient-form/:mode',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final modeStr = state.pathParameters['mode']!;
+          return PatientFormScreen(mode: modeStr);
         },
       ),
     ],

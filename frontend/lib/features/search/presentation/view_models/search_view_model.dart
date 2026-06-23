@@ -10,6 +10,10 @@ part 'search_view_model.g.dart';
 
 enum SortOrder { ascending, descending }
 
+class _CancelledException implements Exception {
+  const _CancelledException();
+}
+
 extension DebounceAndCancelExtension on Ref {
   Future<void> debounce([
     Duration duration = const Duration(milliseconds: 500),
@@ -18,7 +22,7 @@ extension DebounceAndCancelExtension on Ref {
     onDispose(() => didDispose = true);
     await Future<void>.delayed(duration);
     if (didDispose) {
-      throw Exception('Cancelled');
+      throw const _CancelledException();
     }
   }
 }
@@ -58,7 +62,10 @@ Future<List<PatientEntity>> fetchedPatients(Ref ref) async {
   final repo = ref.watch(patientRepositoryProvider);
   final result = await repo.getPatients(query: query);
 
-  return result.fold((err) => throw Exception(err), (patients) => patients);
+  return result.fold(
+    (err) => throw Exception(err),
+    (patients) => patients,
+  );
 }
 
 @riverpod
@@ -90,7 +97,10 @@ Future<List<StaffEntity>> fetchedStaff(Ref ref) async {
   final repo = ref.watch(staffRepositoryProvider);
   final result = await repo.getStaff(query: query);
 
-  return result.fold((err) => throw Exception(err), (staff) => staff);
+  return result.fold(
+    (err) => throw Exception(err),
+    (staff) => staff,
+  );
 }
 
 @riverpod

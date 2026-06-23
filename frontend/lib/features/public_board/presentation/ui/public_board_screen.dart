@@ -12,14 +12,6 @@ class PublicBoardScreen extends ConsumerStatefulWidget {
 }
 
 class _PublicBoardScreenState extends ConsumerState<PublicBoardScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(webSocketServiceProvider).connect();
-    });
-  }
-
   Color _getPriorityColor(int priority) {
     switch (priority) {
       case 1:
@@ -47,7 +39,6 @@ class _PublicBoardScreenState extends ConsumerState<PublicBoardScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            ref.read(webSocketServiceProvider).disconnect();
             context.pop();
           },
         ),

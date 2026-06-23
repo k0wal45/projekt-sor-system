@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../features/admissions/domain/admission_entity.dart';
@@ -9,6 +10,8 @@ import 'secure_storage_service.dart';
 final webSocketServiceProvider = Provider<WebSocketService>((ref) {
   final storage = ref.watch(secureStorageServiceProvider);
   final service = WebSocketService(storage);
+
+  service.connect();
 
   ref.onDispose(() {
     service.disconnect();
@@ -20,17 +23,29 @@ final webSocketServiceProvider = Provider<WebSocketService>((ref) {
 class WebSocketService {
   final SecureStorageService _storage;
   WebSocketChannel? _channel;
-  final _admissionsController =
-      StreamController<List<AdmissionEntity>>.broadcast();
+  StreamController<List<AdmissionEntity>>? _admissionsController;
+  Timer? _reconnectTimer;
+  int _reconnectAttempts = 0;
+  bool _isDisposed = false;
 
-  WebSocketService(this._storage);
+  static const int _maxReconnectAttempts = 10;
+  static const Duration _initialReconnectDelay = Duration(seconds: 2);
 
-  Stream<List<AdmissionEntity>> get queueStream => _admissionsController.stream;
+  WebSocketService(this._storage) {
+    _admissionsController = StreamController<List<AdmissionEntity>>.broadcast();
+  }
+
+  Stream<List<AdmissionEntity>> get queueStream =>
+      _admissionsController?.stream ?? const Stream.empty();
+
+  bool get isConnected => _channel != null;
 
   Future<void> connect() async {
+    if (_isDisposed) return;
+    if (_channel != null) return;
+
     final token = await _storage.getToken();
 
-    // Allow empty token for public board (TV)
     final tokenQuery = token != null ? '?token=$token' : '';
 
     final uri = Uri.parse(EnvConstants.apiUrl);
@@ -39,31 +54,57 @@ class WebSocketService {
     final wsUrlStr =
         '$wsScheme://${uri.host}:${uri.port}${path}ws/admissions/queue$tokenQuery';
 
-    _channel = WebSocketChannel.connect(Uri.parse(wsUrlStr));
+    try {
+      _channel = WebSocketChannel.connect(Uri.parse(wsUrlStr));
 
-    _channel!.stream.listen(
-      (message) {
-        try {
-          final List<dynamic> decoded = jsonDecode(message);
-          final admissions = decoded
-              .map((e) => AdmissionEntity.fromJson(e))
-              .toList();
-          _admissionsController.add(admissions);
-        } catch (e, st) {
-          _admissionsController.addError('Błąd parsowania ws: $e', st);
-        }
-      },
-      onDone: () {
-        // print('Rozłączono WS');
-      },
-      onError: (error, st) {
-        _admissionsController.addError('Błąd połączenia ws: $error', st);
-      },
-    );
+      _channel!.stream.listen(
+        (message) {
+          _reconnectAttempts = 0;
+          try {
+            final List<dynamic> decoded = jsonDecode(message);
+            final admissions =
+                decoded.map((e) => AdmissionEntity.fromJson(e)).toList();
+            _admissionsController?.add(admissions);
+          } catch (e, st) {
+            _admissionsController?.addError('Błąd parsowania ws: $e', st);
+          }
+        },
+        onDone: () {
+          _channel = null;
+          _scheduleReconnect();
+        },
+        onError: (error, st) {
+          _admissionsController?.addError('Błąd połączenia ws: $error', st);
+          _channel = null;
+          _scheduleReconnect();
+        },
+      );
+    } catch (e) {
+      _channel = null;
+      _scheduleReconnect();
+    }
+  }
+
+  void _scheduleReconnect() {
+    if (_isDisposed) return;
+    if (_reconnectAttempts >= _maxReconnectAttempts) return;
+
+    _reconnectTimer?.cancel();
+    final delay = _initialReconnectDelay * pow(2, _reconnectAttempts);
+    _reconnectAttempts++;
+
+    _reconnectTimer = Timer(delay, () {
+      connect();
+    });
   }
 
   void disconnect() {
+    _isDisposed = true;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     _channel?.sink.close();
     _channel = null;
+    _admissionsController?.close();
+    _admissionsController = null;
   }
 }

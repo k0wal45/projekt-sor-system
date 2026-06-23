@@ -20,7 +20,7 @@ final class DoctorViewModelProvider
         argument: null,
         retry: null,
         name: r'doctorViewModelProvider',
-        isAutoDispose: false,
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class DoctorViewModelProvider
   }
 }
 
-String _$doctorViewModelHash() => r'404d7dc4569d9b91ebc39b81b80482d3c818eae1';
+String _$doctorViewModelHash() => r'3b07a929945e07501a688bffd95d26391c942f00';
 
 abstract class _$DoctorViewModel extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
