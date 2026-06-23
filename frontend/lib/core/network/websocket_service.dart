@@ -31,12 +31,20 @@ class WebSocketService {
   static const int _maxReconnectAttempts = 10;
   static const Duration _initialReconnectDelay = Duration(seconds: 2);
 
+  List<AdmissionEntity>? _lastAdmissions;
+
   WebSocketService(this._storage) {
     _admissionsController = StreamController<List<AdmissionEntity>>.broadcast();
   }
 
-  Stream<List<AdmissionEntity>> get queueStream =>
-      _admissionsController?.stream ?? const Stream.empty();
+  Stream<List<AdmissionEntity>> get queueStream async* {
+    if (_lastAdmissions != null) {
+      yield _lastAdmissions!;
+    }
+    if (_admissionsController != null) {
+      yield* _admissionsController!.stream;
+    }
+  }
 
   bool get isConnected => _channel != null;
 
@@ -62,8 +70,10 @@ class WebSocketService {
           _reconnectAttempts = 0;
           try {
             final List<dynamic> decoded = jsonDecode(message);
-            final admissions =
-                decoded.map((e) => AdmissionEntity.fromJson(e)).toList();
+            final admissions = decoded
+                .map((e) => AdmissionEntity.fromJson(e))
+                .toList();
+            _lastAdmissions = admissions;
             _admissionsController?.add(admissions);
           } catch (e, st) {
             _admissionsController?.addError('Błąd parsowania ws: $e', st);

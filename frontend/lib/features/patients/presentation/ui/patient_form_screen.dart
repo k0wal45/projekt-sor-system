@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/patient_entity.dart';
-import '../../data/patient_repository_impl.dart';
+import '../view_models/patient_form_view_model.dart';
 
 class PatientFormScreen extends ConsumerStatefulWidget {
   final String mode;
@@ -19,8 +19,6 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _currentMode;
 
-  bool _isLoading = false;
-  String? _errorMessage;
   int _patientId = 0;
 
   final _peselController = TextEditingController();
@@ -46,36 +44,10 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
     }
   }
 
-  Future<void> _loadPatientData(String pesel) async {
-    setState(() => _isLoading = true);
-    final repo = ref.read(patientRepositoryProvider);
-    final result = await repo.getPatient(pesel);
-    result.fold(
-      (err) => setState(() {
-        _errorMessage = err;
-        _isLoading = false;
-      }),
-      (patient) {
-        _patientId = patient.id;
-        _peselController.text = patient.pesel;
-        _firstNameController.text = patient.firstName;
-        _lastNameController.text = patient.lastName;
-        final y = patient.birthDate.year.toString().padLeft(4, '0');
-        final m = patient.birthDate.month.toString().padLeft(2, '0');
-        final d = patient.birthDate.day.toString().padLeft(2, '0');
-        _birthDateController.text = '$y-$m-$d';
-        _genderController.text = patient.gender.value;
-        _addressController.text = patient.address;
-        _phoneController.text = patient.phone;
-        _emailController.text = patient.email;
-        _emergencyNameController.text = patient.emergencyContactName;
-        _emergencyPhoneController.text = patient.emergencyContactPhone;
-        _bloodGroupController.text = patient.bloodGroup?.value ?? '';
-        _allergiesController.text = patient.allergies;
-        _chronicDiseasesController.text = patient.chronicDiseases;
-        setState(() => _isLoading = false);
-      },
-    );
+  void _loadPatientData(String pesel) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(patientFormViewModelProvider.notifier).loadPatient(pesel);
+    });
   }
 
   Future<void> _savePatient() async {
@@ -124,9 +96,6 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
-    final repo = ref.read(patientRepositoryProvider);
-
     final patient = PatientEntity(
       id: _patientId,
       pesel: _peselController.text,
@@ -144,31 +113,27 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
       chronicDiseases: _chronicDiseasesController.text,
     );
 
-    final result = _currentMode == 'create'
-        ? await repo.createPatient(patient)
-        : await repo.updatePatient(patient);
+    final success = await ref.read(patientFormViewModelProvider.notifier).savePatient(patient, _currentMode == 'create');
 
-    result.fold(
-      (err) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(err)));
-        setState(() => _isLoading = false);
-      },
-      (_) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Zapisano pomyślnie!')));
-        if (_currentMode == 'create') {
-          context.pop();
-        } else {
-          setState(() {
-            _currentMode = 'view';
-            _isLoading = false;
-          });
-        }
-      },
-    );
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Zapisano pomyślnie!')),
+      );
+      if (_currentMode == 'create') {
+        context.pop();
+      } else {
+        setState(() {
+          _currentMode = 'view';
+        });
+      }
+    } else {
+      final err = ref.read(patientFormViewModelProvider).error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err.toString())),
+      );
+    }
   }
 
   @override
@@ -193,6 +158,30 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
   Widget build(BuildContext context) {
     final isView = _currentMode == 'view';
     final isCreate = _currentMode == 'create';
+    final state = ref.watch(patientFormViewModelProvider);
+
+    ref.listen(patientFormViewModelProvider, (previous, next) {
+      if (previous?.value != next.value && next.value != null && !next.isLoading && !next.hasError) {
+        final patient = next.value!;
+        _patientId = patient.id;
+        _peselController.text = patient.pesel;
+        _firstNameController.text = patient.firstName;
+        _lastNameController.text = patient.lastName;
+        final y = patient.birthDate.year.toString().padLeft(4, '0');
+        final m = patient.birthDate.month.toString().padLeft(2, '0');
+        final d = patient.birthDate.day.toString().padLeft(2, '0');
+        _birthDateController.text = '$y-$m-$d';
+        _genderController.text = patient.gender.value;
+        _addressController.text = patient.address;
+        _phoneController.text = patient.phone;
+        _emailController.text = patient.email;
+        _emergencyNameController.text = patient.emergencyContactName;
+        _emergencyPhoneController.text = patient.emergencyContactPhone;
+        _bloodGroupController.text = patient.bloodGroup?.value ?? '';
+        _allergiesController.text = patient.allergies;
+        _chronicDiseasesController.text = patient.chronicDiseases;
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -212,10 +201,10 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
             ),
         ],
       ),
-      body: _isLoading
+      body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? Center(child: Text(_errorMessage!))
+          : state.hasError && state.value == null
+          ? Center(child: Text(state.error.toString()))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Form(

@@ -12,6 +12,7 @@ import '../../features/patients/presentation/ui/patient_form_screen.dart';
 import '../../features/public_board/presentation/ui/public_board_screen.dart';
 import '../../features/admissions/presentation/ui/triage_form_screen.dart';
 import '../../features/doctor/presentation/ui/doctor_consultation_screen.dart';
+import '../../features/patients/presentation/ui/patient_selection_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -86,9 +87,13 @@ GoRouter appRouter(Ref ref) {
                 builder: (context, state) => const DashboardScreen(),
                 routes: [
                   GoRoute(
+                    path: 'triage-form',
+                    builder: (context, state) => const TriageFormScreen(),
+                  ),
+                  GoRoute(
                     path: 'triage-form/:patientId',
                     builder: (context, state) {
-                      final patientId = int.parse(state.pathParameters['patientId']!);
+                      final patientId = int.tryParse(state.pathParameters['patientId'] ?? '');
                       return TriageFormScreen(patientId: patientId);
                     },
                   ),
@@ -138,6 +143,11 @@ GoRouter appRouter(Ref ref) {
           final modeStr = state.pathParameters['mode']!;
           return PatientFormScreen(mode: modeStr);
         },
+      ),
+      GoRoute(
+        path: '/patient-selection',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PatientSelectionScreen(),
       ),
     ],
   );

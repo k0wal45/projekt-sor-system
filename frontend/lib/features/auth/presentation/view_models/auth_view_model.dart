@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../staff/domain/staff_entity.dart';
-import '../../data/auth_repository_impl.dart';
+import 'package:esor/core/providers/repository_providers.dart';
 
 part 'auth_view_model.g.dart';
 

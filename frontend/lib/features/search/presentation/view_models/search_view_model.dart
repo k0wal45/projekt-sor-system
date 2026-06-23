@@ -2,9 +2,8 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../features/patients/domain/patient_entity.dart';
-import '../../../../features/patients/data/patient_repository_impl.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../../../features/staff/domain/staff_entity.dart';
-import '../../../../features/staff/data/staff_repository_impl.dart';
 
 part 'search_view_model.g.dart';
 

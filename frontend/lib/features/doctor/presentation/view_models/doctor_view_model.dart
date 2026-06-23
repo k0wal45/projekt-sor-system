@@ -1,4 +1,4 @@
-import 'package:esor/features/doctor/data/doctor_repository_impl.dart';
+import 'package:esor/core/providers/repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../admissions/domain/admission_entity.dart';
 

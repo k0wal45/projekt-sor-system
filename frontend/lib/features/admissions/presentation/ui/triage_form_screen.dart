@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/admission_repository.dart';
 import '../view_models/triage_form_view_model.dart';
+import '../../../patients/domain/patient_entity.dart';
+import '../../../../core/providers/repository_providers.dart';
 
 class TriageFormScreen extends ConsumerStatefulWidget {
-  final int patientId;
-  const TriageFormScreen({super.key, required this.patientId});
+  final int? patientId;
+  const TriageFormScreen({super.key, this.patientId});
 
   @override
   ConsumerState<TriageFormScreen> createState() => _TriageFormScreenState();
@@ -16,6 +18,38 @@ class TriageFormScreen extends ConsumerStatefulWidget {
 
 class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  PatientEntity? _selectedPatient;
+  bool _isLoadingPatient = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.patientId != null) {
+      _loadPatient(widget.patientId!);
+    }
+  }
+
+  Future<void> _loadPatient(int id) async {
+    setState(() => _isLoadingPatient = true);
+    final repo = ref.read(patientRepositoryProvider);
+    final result = await repo.getPatients();
+    if (mounted) {
+      setState(() {
+        _isLoadingPatient = false;
+        result.fold(
+          (l) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Błąd pobierania pacjenta: $l'))),
+          (patients) {
+            try {
+              _selectedPatient = patients.firstWhere((p) => p.id == id);
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nie znaleziono pacjenta o podanym ID')));
+            }
+          },
+        );
+      });
+    }
+  }
 
   ArrivalMode? _arrivalMode;
   MentalStatus? _mentalStatus;
@@ -48,7 +82,7 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
 
   TriageFormDto _buildDto() {
     return TriageFormDto(
-      patientId: widget.patientId,
+      patientId: _selectedPatient!.id,
       arrivalMode: _arrivalMode!,
       injury: _injury,
       mentalStatus: _mentalStatus!,
@@ -101,6 +135,12 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
   }
 
   Future<void> _submit() async {
+    if (_selectedPatient == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Musisz wybrać pacjenta przed zapisaniem.')),
+      );
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
     if (_selectedPriority == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -166,6 +206,45 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (_isLoadingPatient)
+                      const Center(child: CircularProgressIndicator())
+                    else if (_selectedPatient == null)
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await context.push<PatientEntity>('/patient-selection');
+                          if (result != null && mounted) {
+                            setState(() {
+                              _selectedPatient = result;
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.person_add),
+                        label: const Text('Wybierz pacjenta'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      )
+                    else
+                      Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: ListTile(
+                          leading: const CircleAvatar(child: Icon(Icons.person)),
+                          title: Text('${_selectedPatient!.firstName} ${_selectedPatient!.lastName}'),
+                          subtitle: Text('PESEL: ${_selectedPatient!.pesel}'),
+                          trailing: TextButton(
+                            onPressed: () async {
+                              final result = await context.push<PatientEntity>('/patient-selection');
+                              if (result != null && mounted) {
+                                setState(() {
+                                  _selectedPatient = result;
+                                });
+                              }
+                            },
+                            child: const Text('Zmień'),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
                     Text(
                       'Parametry życiowe i wywiad',
                       style: Theme.of(context).textTheme.titleLarge,

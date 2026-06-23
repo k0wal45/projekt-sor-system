@@ -1,4 +1,4 @@
-import 'package:esor/features/admissions/data/admission_repository_impl.dart';
+import 'package:esor/core/providers/repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../features/admissions/domain/admission_entity.dart';
 import '../../../../features/auth/presentation/view_models/auth_view_model.dart';
@@ -23,8 +23,8 @@ class MyPatients extends _$MyPatients {
     );
 
     List<AdmissionEntity> list = [];
-    result1.fold((l) => null, (r) => list.addAll(r));
-    result2.fold((l) => null, (r) => list.addAll(r));
+    result1.fold((err) => throw Exception(err), (r) => list.addAll(r));
+    result2.fold((err) => throw Exception(err), (r) => list.addAll(r));
 
     return list.where((a) => a.doctorId == user.id).toList();
   }

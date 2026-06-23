@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:esor/features/admissions/data/admission_repository_impl.dart';
+import 'package:esor/core/providers/repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/admission_repository.dart';
 

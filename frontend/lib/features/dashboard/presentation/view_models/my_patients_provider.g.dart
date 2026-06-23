@@ -33,7 +33,7 @@ final class MyPatientsProvider
   MyPatients create() => MyPatients();
 }
 
-String _$myPatientsHash() => r'f6b72ac347a62db81c672043269a97a50679ef73';
+String _$myPatientsHash() => r'dca4b2f327bda42d8c797b36be7196c7645aec1e';
 
 abstract class _$MyPatients extends $AsyncNotifier<List<AdmissionEntity>> {
   FutureOr<List<AdmissionEntity>> build();

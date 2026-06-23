@@ -1,6 +1,6 @@
-import 'package:esor/features/admissions/domain/admission_entity.dart';
+
 import 'package:esor/features/doctor/presentation/view_models/doctor_view_model.dart';
-import 'package:esor/features/patients/data/patient_repository_impl.dart';
+
 import 'package:esor/features/staff/domain/staff_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,62 +18,6 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  final _peselController = TextEditingController();
-
-  @override
-  void dispose() {
-    _peselController.dispose();
-    super.dispose();
-  }
-
-  void _showTriageDialog() {
-    _peselController.clear();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rozpocznij Triage'),
-        content: TextField(
-          controller: _peselController,
-          decoration: const InputDecoration(
-            labelText: 'PESEL Pacjenta',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Anuluj'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final pesel = _peselController.text;
-              if (pesel.isEmpty) return;
-
-              // We need repo directly here just for pesel to ID mapping.
-              // In clean architecture we'd use a ViewModel, but this is simple enough.
-              final repo = ref.read(patientRepositoryProvider);
-              final result = await repo.getPatient(pesel);
-
-              if (context.mounted) {
-                Navigator.pop(context);
-                result.fold(
-                  (err) => ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Błąd: $err'))),
-                  (patient) {
-                    context.push('/triage-form/${patient.id}');
-                  },
-                );
-              }
-            },
-            child: const Text('Dalej'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Color _getPriorityColor(int priority) {
     switch (priority) {
       case 1:
@@ -99,7 +43,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(title: const Text('Kolejka SOR')),
       floatingActionButton: authState.value?.role != StaffRole.doctor
           ? FloatingActionButton.extended(
-              onPressed: _showTriageDialog,
+              onPressed: () => context.push('/triage-form'),
               icon: const Icon(Icons.add),
               label: const Text('Nowy Triage'),
             )
@@ -173,13 +117,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildQueueList(WidgetRef ref, StaffEntity? user) {
-    final queueState = ref.watch(queueViewModelProvider);
+    final queueState = ref.watch(visibleQueueProvider);
 
     return queueState.when(
-      data: (queue) {
-        final visibleQueue = queue
-            .where((e) => e.status == AdmissionStatus.inQueue)
-            .toList();
+      data: (visibleQueue) {
 
         if (visibleQueue.isEmpty) {
           return const Center(child: Text('Kolejka jest pusta.'));

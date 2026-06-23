@@ -22,6 +22,7 @@ class MyApp extends ConsumerWidget {
     final materialTheme = MaterialTheme(textTheme);
 
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'E-SOR',
       theme: materialTheme.light(),
       darkTheme: materialTheme.dark(),
