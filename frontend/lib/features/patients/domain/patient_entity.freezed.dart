@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PatientEntity {
 
- String get pesel;@JsonKey(name: 'first_name') String get firstName;@JsonKey(name: 'last_name') String get lastName;@JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() DateTime get birthDate; Gender get gender; String get address; String get phone; String get email;@JsonKey(name: 'emergency_contact_name') String get emergencyContactName;@JsonKey(name: 'emergency_contact_phone') String get emergencyContactPhone;@JsonKey(name: 'blood_group') BloodGroup? get bloodGroup; String get allergies;@JsonKey(name: 'chronic_diseases') String get chronicDiseases;
+ int get id; String get pesel;@JsonKey(name: 'first_name') String get firstName;@JsonKey(name: 'last_name') String get lastName;@JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() DateTime get birthDate; Gender get gender; String get address; String get phone; String get email;@JsonKey(name: 'emergency_contact_name') String get emergencyContactName;@JsonKey(name: 'emergency_contact_phone') String get emergencyContactPhone;@JsonKey(name: 'blood_group') BloodGroup? get bloodGroup; String get allergies;@JsonKey(name: 'chronic_diseases') String get chronicDiseases;
 /// Create a copy of PatientEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $PatientEntityCopyWith<PatientEntity> get copyWith => _$PatientEntityCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientEntity&&(identical(other.pesel, pesel) || other.pesel == pesel)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.emergencyContactName, emergencyContactName) || other.emergencyContactName == emergencyContactName)&&(identical(other.emergencyContactPhone, emergencyContactPhone) || other.emergencyContactPhone == emergencyContactPhone)&&(identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup)&&(identical(other.allergies, allergies) || other.allergies == allergies)&&(identical(other.chronicDiseases, chronicDiseases) || other.chronicDiseases == chronicDiseases));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.pesel, pesel) || other.pesel == pesel)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.emergencyContactName, emergencyContactName) || other.emergencyContactName == emergencyContactName)&&(identical(other.emergencyContactPhone, emergencyContactPhone) || other.emergencyContactPhone == emergencyContactPhone)&&(identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup)&&(identical(other.allergies, allergies) || other.allergies == allergies)&&(identical(other.chronicDiseases, chronicDiseases) || other.chronicDiseases == chronicDiseases));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,pesel,firstName,lastName,birthDate,gender,address,phone,email,emergencyContactName,emergencyContactPhone,bloodGroup,allergies,chronicDiseases);
+int get hashCode => Object.hash(runtimeType,id,pesel,firstName,lastName,birthDate,gender,address,phone,email,emergencyContactName,emergencyContactPhone,bloodGroup,allergies,chronicDiseases);
 
 @override
 String toString() {
-  return 'PatientEntity(pesel: $pesel, firstName: $firstName, lastName: $lastName, birthDate: $birthDate, gender: $gender, address: $address, phone: $phone, email: $email, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, bloodGroup: $bloodGroup, allergies: $allergies, chronicDiseases: $chronicDiseases)';
+  return 'PatientEntity(id: $id, pesel: $pesel, firstName: $firstName, lastName: $lastName, birthDate: $birthDate, gender: $gender, address: $address, phone: $phone, email: $email, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, bloodGroup: $bloodGroup, allergies: $allergies, chronicDiseases: $chronicDiseases)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $PatientEntityCopyWith<$Res>  {
   factory $PatientEntityCopyWith(PatientEntity value, $Res Function(PatientEntity) _then) = _$PatientEntityCopyWithImpl;
 @useResult
 $Res call({
- String pesel,@JsonKey(name: 'first_name') String firstName,@JsonKey(name: 'last_name') String lastName,@JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() DateTime birthDate, Gender gender, String address, String phone, String email,@JsonKey(name: 'emergency_contact_name') String emergencyContactName,@JsonKey(name: 'emergency_contact_phone') String emergencyContactPhone,@JsonKey(name: 'blood_group') BloodGroup? bloodGroup, String allergies,@JsonKey(name: 'chronic_diseases') String chronicDiseases
+ int id, String pesel,@JsonKey(name: 'first_name') String firstName,@JsonKey(name: 'last_name') String lastName,@JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() DateTime birthDate, Gender gender, String address, String phone, String email,@JsonKey(name: 'emergency_contact_name') String emergencyContactName,@JsonKey(name: 'emergency_contact_phone') String emergencyContactPhone,@JsonKey(name: 'blood_group') BloodGroup? bloodGroup, String allergies,@JsonKey(name: 'chronic_diseases') String chronicDiseases
 });
 
 
@@ -65,9 +65,10 @@ class _$PatientEntityCopyWithImpl<$Res>
 
 /// Create a copy of PatientEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? pesel = null,Object? firstName = null,Object? lastName = null,Object? birthDate = null,Object? gender = null,Object? address = null,Object? phone = null,Object? email = null,Object? emergencyContactName = null,Object? emergencyContactPhone = null,Object? bloodGroup = freezed,Object? allergies = null,Object? chronicDiseases = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? pesel = null,Object? firstName = null,Object? lastName = null,Object? birthDate = null,Object? gender = null,Object? address = null,Object? phone = null,Object? email = null,Object? emergencyContactName = null,Object? emergencyContactPhone = null,Object? bloodGroup = freezed,Object? allergies = null,Object? chronicDiseases = null,}) {
   return _then(_self.copyWith(
-pesel: null == pesel ? _self.pesel : pesel // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,pesel: null == pesel ? _self.pesel : pesel // ignore: cast_nullable_to_non_nullable
 as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
 as String,lastName: null == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
 as String,birthDate: null == birthDate ? _self.birthDate : birthDate // ignore: cast_nullable_to_non_nullable
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String pesel, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter()  DateTime birthDate,  Gender gender,  String address,  String phone,  String email, @JsonKey(name: 'emergency_contact_name')  String emergencyContactName, @JsonKey(name: 'emergency_contact_phone')  String emergencyContactPhone, @JsonKey(name: 'blood_group')  BloodGroup? bloodGroup,  String allergies, @JsonKey(name: 'chronic_diseases')  String chronicDiseases)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String pesel, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter()  DateTime birthDate,  Gender gender,  String address,  String phone,  String email, @JsonKey(name: 'emergency_contact_name')  String emergencyContactName, @JsonKey(name: 'emergency_contact_phone')  String emergencyContactPhone, @JsonKey(name: 'blood_group')  BloodGroup? bloodGroup,  String allergies, @JsonKey(name: 'chronic_diseases')  String chronicDiseases)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PatientEntity() when $default != null:
-return $default(_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that.gender,_that.address,_that.phone,_that.email,_that.emergencyContactName,_that.emergencyContactPhone,_that.bloodGroup,_that.allergies,_that.chronicDiseases);case _:
+return $default(_that.id,_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that.gender,_that.address,_that.phone,_that.email,_that.emergencyContactName,_that.emergencyContactPhone,_that.bloodGroup,_that.allergies,_that.chronicDiseases);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String pesel, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter()  DateTime birthDate,  Gender gender,  String address,  String phone,  String email, @JsonKey(name: 'emergency_contact_name')  String emergencyContactName, @JsonKey(name: 'emergency_contact_phone')  String emergencyContactPhone, @JsonKey(name: 'blood_group')  BloodGroup? bloodGroup,  String allergies, @JsonKey(name: 'chronic_diseases')  String chronicDiseases)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String pesel, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter()  DateTime birthDate,  Gender gender,  String address,  String phone,  String email, @JsonKey(name: 'emergency_contact_name')  String emergencyContactName, @JsonKey(name: 'emergency_contact_phone')  String emergencyContactPhone, @JsonKey(name: 'blood_group')  BloodGroup? bloodGroup,  String allergies, @JsonKey(name: 'chronic_diseases')  String chronicDiseases)  $default,) {final _that = this;
 switch (_that) {
 case _PatientEntity():
-return $default(_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that.gender,_that.address,_that.phone,_that.email,_that.emergencyContactName,_that.emergencyContactPhone,_that.bloodGroup,_that.allergies,_that.chronicDiseases);case _:
+return $default(_that.id,_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that.gender,_that.address,_that.phone,_that.email,_that.emergencyContactName,_that.emergencyContactPhone,_that.bloodGroup,_that.allergies,_that.chronicDiseases);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String pesel, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter()  DateTime birthDate,  Gender gender,  String address,  String phone,  String email, @JsonKey(name: 'emergency_contact_name')  String emergencyContactName, @JsonKey(name: 'emergency_contact_phone')  String emergencyContactPhone, @JsonKey(name: 'blood_group')  BloodGroup? bloodGroup,  String allergies, @JsonKey(name: 'chronic_diseases')  String chronicDiseases)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String pesel, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter()  DateTime birthDate,  Gender gender,  String address,  String phone,  String email, @JsonKey(name: 'emergency_contact_name')  String emergencyContactName, @JsonKey(name: 'emergency_contact_phone')  String emergencyContactPhone, @JsonKey(name: 'blood_group')  BloodGroup? bloodGroup,  String allergies, @JsonKey(name: 'chronic_diseases')  String chronicDiseases)?  $default,) {final _that = this;
 switch (_that) {
 case _PatientEntity() when $default != null:
-return $default(_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that.gender,_that.address,_that.phone,_that.email,_that.emergencyContactName,_that.emergencyContactPhone,_that.bloodGroup,_that.allergies,_that.chronicDiseases);case _:
+return $default(_that.id,_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that.gender,_that.address,_that.phone,_that.email,_that.emergencyContactName,_that.emergencyContactPhone,_that.bloodGroup,_that.allergies,_that.chronicDiseases);case _:
   return null;
 
 }
@@ -221,9 +222,10 @@ return $default(_that.pesel,_that.firstName,_that.lastName,_that.birthDate,_that
 @JsonSerializable()
 
 class _PatientEntity implements PatientEntity {
-  const _PatientEntity({required this.pesel, @JsonKey(name: 'first_name') required this.firstName, @JsonKey(name: 'last_name') required this.lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() required this.birthDate, required this.gender, required this.address, required this.phone, required this.email, @JsonKey(name: 'emergency_contact_name') required this.emergencyContactName, @JsonKey(name: 'emergency_contact_phone') required this.emergencyContactPhone, @JsonKey(name: 'blood_group') required this.bloodGroup, required this.allergies, @JsonKey(name: 'chronic_diseases') required this.chronicDiseases});
+  const _PatientEntity({required this.id, required this.pesel, @JsonKey(name: 'first_name') required this.firstName, @JsonKey(name: 'last_name') required this.lastName, @JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() required this.birthDate, required this.gender, required this.address, required this.phone, required this.email, @JsonKey(name: 'emergency_contact_name') required this.emergencyContactName, @JsonKey(name: 'emergency_contact_phone') required this.emergencyContactPhone, @JsonKey(name: 'blood_group') required this.bloodGroup, required this.allergies, @JsonKey(name: 'chronic_diseases') required this.chronicDiseases});
   factory _PatientEntity.fromJson(Map<String, dynamic> json) => _$PatientEntityFromJson(json);
 
+@override final  int id;
 @override final  String pesel;
 @override@JsonKey(name: 'first_name') final  String firstName;
 @override@JsonKey(name: 'last_name') final  String lastName;
@@ -251,16 +253,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientEntity&&(identical(other.pesel, pesel) || other.pesel == pesel)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.emergencyContactName, emergencyContactName) || other.emergencyContactName == emergencyContactName)&&(identical(other.emergencyContactPhone, emergencyContactPhone) || other.emergencyContactPhone == emergencyContactPhone)&&(identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup)&&(identical(other.allergies, allergies) || other.allergies == allergies)&&(identical(other.chronicDiseases, chronicDiseases) || other.chronicDiseases == chronicDiseases));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.pesel, pesel) || other.pesel == pesel)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.birthDate, birthDate) || other.birthDate == birthDate)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.emergencyContactName, emergencyContactName) || other.emergencyContactName == emergencyContactName)&&(identical(other.emergencyContactPhone, emergencyContactPhone) || other.emergencyContactPhone == emergencyContactPhone)&&(identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup)&&(identical(other.allergies, allergies) || other.allergies == allergies)&&(identical(other.chronicDiseases, chronicDiseases) || other.chronicDiseases == chronicDiseases));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,pesel,firstName,lastName,birthDate,gender,address,phone,email,emergencyContactName,emergencyContactPhone,bloodGroup,allergies,chronicDiseases);
+int get hashCode => Object.hash(runtimeType,id,pesel,firstName,lastName,birthDate,gender,address,phone,email,emergencyContactName,emergencyContactPhone,bloodGroup,allergies,chronicDiseases);
 
 @override
 String toString() {
-  return 'PatientEntity(pesel: $pesel, firstName: $firstName, lastName: $lastName, birthDate: $birthDate, gender: $gender, address: $address, phone: $phone, email: $email, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, bloodGroup: $bloodGroup, allergies: $allergies, chronicDiseases: $chronicDiseases)';
+  return 'PatientEntity(id: $id, pesel: $pesel, firstName: $firstName, lastName: $lastName, birthDate: $birthDate, gender: $gender, address: $address, phone: $phone, email: $email, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, bloodGroup: $bloodGroup, allergies: $allergies, chronicDiseases: $chronicDiseases)';
 }
 
 
@@ -271,7 +273,7 @@ abstract mixin class _$PatientEntityCopyWith<$Res> implements $PatientEntityCopy
   factory _$PatientEntityCopyWith(_PatientEntity value, $Res Function(_PatientEntity) _then) = __$PatientEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String pesel,@JsonKey(name: 'first_name') String firstName,@JsonKey(name: 'last_name') String lastName,@JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() DateTime birthDate, Gender gender, String address, String phone, String email,@JsonKey(name: 'emergency_contact_name') String emergencyContactName,@JsonKey(name: 'emergency_contact_phone') String emergencyContactPhone,@JsonKey(name: 'blood_group') BloodGroup? bloodGroup, String allergies,@JsonKey(name: 'chronic_diseases') String chronicDiseases
+ int id, String pesel,@JsonKey(name: 'first_name') String firstName,@JsonKey(name: 'last_name') String lastName,@JsonKey(name: 'date_of_birth')@PatientBirthDateConverter() DateTime birthDate, Gender gender, String address, String phone, String email,@JsonKey(name: 'emergency_contact_name') String emergencyContactName,@JsonKey(name: 'emergency_contact_phone') String emergencyContactPhone,@JsonKey(name: 'blood_group') BloodGroup? bloodGroup, String allergies,@JsonKey(name: 'chronic_diseases') String chronicDiseases
 });
 
 
@@ -288,9 +290,10 @@ class __$PatientEntityCopyWithImpl<$Res>
 
 /// Create a copy of PatientEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? pesel = null,Object? firstName = null,Object? lastName = null,Object? birthDate = null,Object? gender = null,Object? address = null,Object? phone = null,Object? email = null,Object? emergencyContactName = null,Object? emergencyContactPhone = null,Object? bloodGroup = freezed,Object? allergies = null,Object? chronicDiseases = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? pesel = null,Object? firstName = null,Object? lastName = null,Object? birthDate = null,Object? gender = null,Object? address = null,Object? phone = null,Object? email = null,Object? emergencyContactName = null,Object? emergencyContactPhone = null,Object? bloodGroup = freezed,Object? allergies = null,Object? chronicDiseases = null,}) {
   return _then(_PatientEntity(
-pesel: null == pesel ? _self.pesel : pesel // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,pesel: null == pesel ? _self.pesel : pesel // ignore: cast_nullable_to_non_nullable
 as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
 as String,lastName: null == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
 as String,birthDate: null == birthDate ? _self.birthDate : birthDate // ignore: cast_nullable_to_non_nullable

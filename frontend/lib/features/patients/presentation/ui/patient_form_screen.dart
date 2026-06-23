@@ -21,6 +21,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
 
   bool _isLoading = false;
   String? _errorMessage;
+  int _patientId = 0;
 
   final _peselController = TextEditingController();
   final _firstNameController = TextEditingController();
@@ -55,6 +56,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
         _isLoading = false;
       }),
       (patient) {
+        _patientId = patient.id;
         _peselController.text = patient.pesel;
         _firstNameController.text = patient.firstName;
         _lastNameController.text = patient.lastName;
@@ -87,25 +89,38 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
       return;
     }
 
-    final parsedGender = Gender.values.any((e) => e.value == _genderController.text.toUpperCase())
-        ? Gender.values.firstWhere((e) => e.value == _genderController.text.toUpperCase())
+    final parsedGender =
+        Gender.values.any(
+          (e) => e.value == _genderController.text.toUpperCase(),
+        )
+        ? Gender.values.firstWhere(
+            (e) => e.value == _genderController.text.toUpperCase(),
+          )
         : null;
 
     if (parsedGender == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Wybierz płeć')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Wybierz płeć')));
       return;
     }
 
-    final parsedBloodGroup = BloodGroup.values.any((e) => e.value.toUpperCase() == _bloodGroupController.text.toUpperCase())
-        ? BloodGroup.values.firstWhere((e) => e.value.toUpperCase() == _bloodGroupController.text.toUpperCase())
+    final parsedBloodGroup =
+        BloodGroup.values.any(
+          (e) =>
+              e.value.toUpperCase() == _bloodGroupController.text.toUpperCase(),
+        )
+        ? BloodGroup.values.firstWhere(
+            (e) =>
+                e.value.toUpperCase() ==
+                _bloodGroupController.text.toUpperCase(),
+          )
         : null;
 
     if (parsedBloodGroup == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Wybierz grupę krwi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Wybierz grupę krwi')));
       return;
     }
 
@@ -113,6 +128,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
     final repo = ref.read(patientRepositoryProvider);
 
     final patient = PatientEntity(
+      id: _patientId,
       pesel: _peselController.text,
       firstName: _firstNameController.text,
       lastName: _lastNameController.text,

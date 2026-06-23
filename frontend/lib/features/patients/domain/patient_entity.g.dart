@@ -8,6 +8,7 @@ part of 'patient_entity.dart';
 
 _PatientEntity _$PatientEntityFromJson(Map<String, dynamic> json) =>
     _PatientEntity(
+      id: (json['id'] as num).toInt(),
       pesel: json['pesel'] as String,
       firstName: json['first_name'] as String,
       lastName: json['last_name'] as String,
@@ -28,6 +29,7 @@ _PatientEntity _$PatientEntityFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$PatientEntityToJson(
   _PatientEntity instance,
 ) => <String, dynamic>{
+  'id': instance.id,
   'pesel': instance.pesel,
   'first_name': instance.firstName,
   'last_name': instance.lastName,

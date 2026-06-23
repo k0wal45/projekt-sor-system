@@ -35,12 +35,12 @@ extension StaffRoleDisplay on StaffRole {
 @freezed
 abstract class StaffEntity with _$StaffEntity {
   const factory StaffEntity({
-    @JsonKey(name: 'ID') required int id,
-    @JsonKey(name: 'FirstName') required String firstName,
-    @JsonKey(name: 'LastName') required String lastName,
-    @JsonKey(name: 'AcademicTitle') required String academicTitle,
-    @JsonKey(name: 'Role') required StaffRole role,
-    @JsonKey(name: 'LoginEmail') @Default('') String email,
+    @JsonKey(name: 'id') required int id,
+    @JsonKey(name: 'first_name') required String firstName,
+    @JsonKey(name: 'last_name') required String lastName,
+    @JsonKey(name: 'academic_title') @Default('') String academicTitle,
+    @JsonKey(name: 'role') required StaffRole role,
+    @JsonKey(name: 'login_email') @Default('') String email,
   }) = _StaffEntity;
 
   factory StaffEntity.fromJson(Map<String, dynamic> json) =>

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$StaffEntity {
 
-@JsonKey(name: 'ID') int get id;@JsonKey(name: 'FirstName') String get firstName;@JsonKey(name: 'LastName') String get lastName;@JsonKey(name: 'AcademicTitle') String get academicTitle;@JsonKey(name: 'Role') StaffRole get role;@JsonKey(name: 'LoginEmail') String get email;
+@JsonKey(name: 'id') int get id;@JsonKey(name: 'first_name') String get firstName;@JsonKey(name: 'last_name') String get lastName;@JsonKey(name: 'academic_title') String get academicTitle;@JsonKey(name: 'role') StaffRole get role;@JsonKey(name: 'login_email') String get email;
 /// Create a copy of StaffEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $StaffEntityCopyWith<$Res>  {
   factory $StaffEntityCopyWith(StaffEntity value, $Res Function(StaffEntity) _then) = _$StaffEntityCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'ID') int id,@JsonKey(name: 'FirstName') String firstName,@JsonKey(name: 'LastName') String lastName,@JsonKey(name: 'AcademicTitle') String academicTitle,@JsonKey(name: 'Role') StaffRole role,@JsonKey(name: 'LoginEmail') String email
+@JsonKey(name: 'id') int id,@JsonKey(name: 'first_name') String firstName,@JsonKey(name: 'last_name') String lastName,@JsonKey(name: 'academic_title') String academicTitle,@JsonKey(name: 'role') StaffRole role,@JsonKey(name: 'login_email') String email
 });
 
 
@@ -158,7 +158,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'ID')  int id, @JsonKey(name: 'FirstName')  String firstName, @JsonKey(name: 'LastName')  String lastName, @JsonKey(name: 'AcademicTitle')  String academicTitle, @JsonKey(name: 'Role')  StaffRole role, @JsonKey(name: 'LoginEmail')  String email)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  int id, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'academic_title')  String academicTitle, @JsonKey(name: 'role')  StaffRole role, @JsonKey(name: 'login_email')  String email)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StaffEntity() when $default != null:
 return $default(_that.id,_that.firstName,_that.lastName,_that.academicTitle,_that.role,_that.email);case _:
@@ -179,7 +179,7 @@ return $default(_that.id,_that.firstName,_that.lastName,_that.academicTitle,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'ID')  int id, @JsonKey(name: 'FirstName')  String firstName, @JsonKey(name: 'LastName')  String lastName, @JsonKey(name: 'AcademicTitle')  String academicTitle, @JsonKey(name: 'Role')  StaffRole role, @JsonKey(name: 'LoginEmail')  String email)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  int id, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'academic_title')  String academicTitle, @JsonKey(name: 'role')  StaffRole role, @JsonKey(name: 'login_email')  String email)  $default,) {final _that = this;
 switch (_that) {
 case _StaffEntity():
 return $default(_that.id,_that.firstName,_that.lastName,_that.academicTitle,_that.role,_that.email);case _:
@@ -199,7 +199,7 @@ return $default(_that.id,_that.firstName,_that.lastName,_that.academicTitle,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'ID')  int id, @JsonKey(name: 'FirstName')  String firstName, @JsonKey(name: 'LastName')  String lastName, @JsonKey(name: 'AcademicTitle')  String academicTitle, @JsonKey(name: 'Role')  StaffRole role, @JsonKey(name: 'LoginEmail')  String email)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id')  int id, @JsonKey(name: 'first_name')  String firstName, @JsonKey(name: 'last_name')  String lastName, @JsonKey(name: 'academic_title')  String academicTitle, @JsonKey(name: 'role')  StaffRole role, @JsonKey(name: 'login_email')  String email)?  $default,) {final _that = this;
 switch (_that) {
 case _StaffEntity() when $default != null:
 return $default(_that.id,_that.firstName,_that.lastName,_that.academicTitle,_that.role,_that.email);case _:
@@ -214,15 +214,15 @@ return $default(_that.id,_that.firstName,_that.lastName,_that.academicTitle,_tha
 @JsonSerializable()
 
 class _StaffEntity implements StaffEntity {
-  const _StaffEntity({@JsonKey(name: 'ID') required this.id, @JsonKey(name: 'FirstName') required this.firstName, @JsonKey(name: 'LastName') required this.lastName, @JsonKey(name: 'AcademicTitle') required this.academicTitle, @JsonKey(name: 'Role') required this.role, @JsonKey(name: 'LoginEmail') this.email = ''});
+  const _StaffEntity({@JsonKey(name: 'id') required this.id, @JsonKey(name: 'first_name') required this.firstName, @JsonKey(name: 'last_name') required this.lastName, @JsonKey(name: 'academic_title') this.academicTitle = '', @JsonKey(name: 'role') required this.role, @JsonKey(name: 'login_email') this.email = ''});
   factory _StaffEntity.fromJson(Map<String, dynamic> json) => _$StaffEntityFromJson(json);
 
-@override@JsonKey(name: 'ID') final  int id;
-@override@JsonKey(name: 'FirstName') final  String firstName;
-@override@JsonKey(name: 'LastName') final  String lastName;
-@override@JsonKey(name: 'AcademicTitle') final  String academicTitle;
-@override@JsonKey(name: 'Role') final  StaffRole role;
-@override@JsonKey(name: 'LoginEmail') final  String email;
+@override@JsonKey(name: 'id') final  int id;
+@override@JsonKey(name: 'first_name') final  String firstName;
+@override@JsonKey(name: 'last_name') final  String lastName;
+@override@JsonKey(name: 'academic_title') final  String academicTitle;
+@override@JsonKey(name: 'role') final  StaffRole role;
+@override@JsonKey(name: 'login_email') final  String email;
 
 /// Create a copy of StaffEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -257,7 +257,7 @@ abstract mixin class _$StaffEntityCopyWith<$Res> implements $StaffEntityCopyWith
   factory _$StaffEntityCopyWith(_StaffEntity value, $Res Function(_StaffEntity) _then) = __$StaffEntityCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'ID') int id,@JsonKey(name: 'FirstName') String firstName,@JsonKey(name: 'LastName') String lastName,@JsonKey(name: 'AcademicTitle') String academicTitle,@JsonKey(name: 'Role') StaffRole role,@JsonKey(name: 'LoginEmail') String email
+@JsonKey(name: 'id') int id,@JsonKey(name: 'first_name') String firstName,@JsonKey(name: 'last_name') String lastName,@JsonKey(name: 'academic_title') String academicTitle,@JsonKey(name: 'role') StaffRole role,@JsonKey(name: 'login_email') String email
 });
 
 

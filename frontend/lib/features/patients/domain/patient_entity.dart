@@ -57,6 +57,7 @@ class PatientBirthDateConverter implements JsonConverter<DateTime, String> {
 @freezed
 abstract class PatientEntity with _$PatientEntity {
   const factory PatientEntity({
+    required int id,
     required String pesel,
     @JsonKey(name: 'first_name') required String firstName,
     @JsonKey(name: 'last_name') required String lastName,

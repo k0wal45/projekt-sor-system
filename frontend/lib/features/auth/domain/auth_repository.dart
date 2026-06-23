@@ -1,8 +1,8 @@
 import 'package:fpdart/fpdart.dart';
-import 'user_entity.dart';
+import '../../staff/domain/staff_entity.dart';
 
 abstract class AuthRepository {
-  Future<Either<String, UserEntity>> login(String email, String password);
-  Future<Either<String, UserEntity>> getMe();
+  Future<Either<String, StaffEntity>> login(String email, String password);
+  Future<Either<String, StaffEntity>> getMe();
   Future<void> logout();
 }

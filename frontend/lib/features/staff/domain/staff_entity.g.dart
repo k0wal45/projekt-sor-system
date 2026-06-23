@@ -7,22 +7,22 @@ part of 'staff_entity.dart';
 // **************************************************************************
 
 _StaffEntity _$StaffEntityFromJson(Map<String, dynamic> json) => _StaffEntity(
-  id: (json['ID'] as num).toInt(),
-  firstName: json['FirstName'] as String,
-  lastName: json['LastName'] as String,
-  academicTitle: json['AcademicTitle'] as String,
-  role: $enumDecode(_$StaffRoleEnumMap, json['Role']),
-  email: json['LoginEmail'] as String? ?? '',
+  id: (json['id'] as num).toInt(),
+  firstName: json['first_name'] as String,
+  lastName: json['last_name'] as String,
+  academicTitle: json['academic_title'] as String? ?? '',
+  role: $enumDecode(_$StaffRoleEnumMap, json['role']),
+  email: json['login_email'] as String? ?? '',
 );
 
 Map<String, dynamic> _$StaffEntityToJson(_StaffEntity instance) =>
     <String, dynamic>{
-      'ID': instance.id,
-      'FirstName': instance.firstName,
-      'LastName': instance.lastName,
-      'AcademicTitle': instance.academicTitle,
-      'Role': _$StaffRoleEnumMap[instance.role]!,
-      'LoginEmail': instance.email,
+      'id': instance.id,
+      'first_name': instance.firstName,
+      'last_name': instance.lastName,
+      'academic_title': instance.academicTitle,
+      'role': _$StaffRoleEnumMap[instance.role]!,
+      'login_email': instance.email,
     };
 
 const _$StaffRoleEnumMap = {

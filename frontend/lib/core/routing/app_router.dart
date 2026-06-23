@@ -9,6 +9,9 @@ import '../../features/dashboard/presentation/ui/main_shell_screen.dart';
 import '../../features/search/presentation/ui/search_screen.dart';
 import '../../features/settings/presentation/ui/settings_screen.dart';
 import '../../features/patients/presentation/ui/patient_form_screen.dart';
+import '../../features/public_board/presentation/ui/public_board_screen.dart';
+import '../../features/admissions/presentation/ui/triage_form_screen.dart';
+import '../../features/doctor/presentation/ui/doctor_consultation_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -34,6 +37,11 @@ GoRouter appRouter(Ref ref) {
       final isAuthLoading = authState.isLoading;
       final isAuthenticated = authState.hasValue && authState.value != null;
       final isLoggingIn = state.matchedLocation == '/login';
+      final isTvBoard = state.matchedLocation == '/tv-board';
+
+      if (isTvBoard) {
+        return null; // Public route
+      }
 
       if (isAuthLoading) {
         return null;
@@ -51,6 +59,10 @@ GoRouter appRouter(Ref ref) {
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/tv-board',
+        builder: (context, state) => const PublicBoardScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           if (authState.isLoading) {
@@ -67,6 +79,22 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: '/',
                 builder: (context, state) => const DashboardScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'triage-form/:patientId',
+                    builder: (context, state) {
+                      final patientId = int.parse(state.pathParameters['patientId']!);
+                      return TriageFormScreen(patientId: patientId);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'consultation/:admissionId',
+                    builder: (context, state) {
+                      final admissionId = int.parse(state.pathParameters['admissionId']!);
+                      return DoctorConsultationScreen(admissionId: admissionId);
+                    },
+                  ),
+                ],
               ),
             ],
           ),

@@ -13,7 +13,7 @@ part of 'auth_view_model.dart';
 final authViewModelProvider = AuthViewModelProvider._();
 
 final class AuthViewModelProvider
-    extends $AsyncNotifierProvider<AuthViewModel, UserEntity?> {
+    extends $AsyncNotifierProvider<AuthViewModel, StaffEntity?> {
   AuthViewModelProvider._()
     : super(
         from: null,
@@ -33,19 +33,19 @@ final class AuthViewModelProvider
   AuthViewModel create() => AuthViewModel();
 }
 
-String _$authViewModelHash() => r'34250f395104c99307b6977112ed39ca4b9a7215';
+String _$authViewModelHash() => r'e92500276ef8bd50ac89953bc3c9d34041b08f06';
 
-abstract class _$AuthViewModel extends $AsyncNotifier<UserEntity?> {
-  FutureOr<UserEntity?> build();
+abstract class _$AuthViewModel extends $AsyncNotifier<StaffEntity?> {
+  FutureOr<StaffEntity?> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<UserEntity?>, UserEntity?>;
+    final ref = this.ref as $Ref<AsyncValue<StaffEntity?>, StaffEntity?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<UserEntity?>, UserEntity?>,
-              AsyncValue<UserEntity?>,
+              AnyNotifier<AsyncValue<StaffEntity?>, StaffEntity?>,
+              AsyncValue<StaffEntity?>,
               Object?,
               Object?
             >;

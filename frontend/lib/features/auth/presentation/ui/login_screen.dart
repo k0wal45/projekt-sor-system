@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../view_models/auth_view_model.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -92,6 +93,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: authState.isLoading
                       ? const CircularProgressIndicator()
                       : const Text('ZALOGUJ'),
+                ),
+                const SizedBox(height: 24),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    context.push('/tv-board');
+                  },
+                  icon: const Icon(Icons.tv),
+                  label: const Text('Uruchom Ekran Poczekalni (TV)'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                 ),
               ],
             ),

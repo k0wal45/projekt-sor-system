@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/secure_storage_service.dart';
 import '../domain/auth_repository.dart';
-import '../domain/user_entity.dart';
+import '../../staff/domain/staff_entity.dart';
 
 part 'auth_repository_impl.g.dart';
 
@@ -23,7 +23,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._dio, this._storage);
 
   @override
-  Future<Either<String, UserEntity>> login(
+  Future<Either<String, StaffEntity>> login(
     String email,
     String password,
   ) async {
@@ -36,9 +36,12 @@ class AuthRepositoryImpl implements AuthRepository {
       final token = response.data['token'] as String;
       await _storage.saveToken(token);
 
-      final user = UserEntity.fromJson(
-        response.data['user'] as Map<String, dynamic>,
-      );
+      final userJson = response.data['user'] as Map<String, dynamic>;
+      // Backend might omit academic_title and email in login response
+      userJson['academic_title'] = userJson['academic_title'] ?? '';
+      userJson['login_email'] = userJson['login_email'] ?? userJson['email'] ?? email;
+
+      final user = StaffEntity.fromJson(userJson);
       return right(user);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -51,7 +54,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<String, UserEntity>> getMe() async {
+  Future<Either<String, StaffEntity>> getMe() async {
     try {
       final token = await _storage.getToken();
       if (token == null) {
@@ -59,7 +62,12 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       final response = await _dio.get('/auth/me');
-      final user = UserEntity.fromJson(response.data as Map<String, dynamic>);
+      final userJson = response.data as Map<String, dynamic>;
+      // Map 'email' to 'login_email' since StaffEntity uses 'login_email' key
+      userJson['login_email'] = userJson['login_email'] ?? userJson['email'] ?? '';
+      userJson['academic_title'] = userJson['academic_title'] ?? '';
+
+      final user = StaffEntity.fromJson(userJson);
       return right(user);
     } catch (e) {
       return left('Nie udało się pobrać danych użytkownika: $e');

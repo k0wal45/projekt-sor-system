@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../domain/user_entity.dart';
+import '../../../staff/domain/staff_entity.dart';
 import '../../data/auth_repository_impl.dart';
 
 part 'auth_view_model.g.dart';
@@ -8,12 +8,12 @@ part 'auth_view_model.g.dart';
 @Riverpod(keepAlive: true)
 class AuthViewModel extends _$AuthViewModel {
   @override
-  FutureOr<UserEntity?> build() async {
+  FutureOr<StaffEntity?> build() async {
     // Attempt to load user data if token exists
     return _initAuth();
   }
 
-  Future<UserEntity?> _initAuth() async {
+  Future<StaffEntity?> _initAuth() async {
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.getMe();
     
