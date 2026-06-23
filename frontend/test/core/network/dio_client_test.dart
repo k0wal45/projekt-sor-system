@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSecureStorageService extends Mock implements SecureStorageService {}
-class MockRequestInterceptorHandler extends Mock implements RequestInterceptorHandler {}
+
+class MockRequestInterceptorHandler extends Mock
+    implements RequestInterceptorHandler {}
 
 void main() {
   late MockSecureStorageService mockStorage;
@@ -39,46 +41,55 @@ void main() {
         ],
       );
 
-      when(() => mockStorage.getToken()).thenAnswer((_) async => 'fake-jwt-token');
+      when(
+        () => mockStorage.getToken(),
+      ).thenAnswer((_) async => 'fake-jwt-token');
 
       final dio = container.read(dioClientProvider);
-      
+
       // Get the injected interceptor
-      final interceptor = dio.interceptors.firstWhere((i) => i is InterceptorsWrapper) as InterceptorsWrapper;
-      
+      final interceptor =
+          dio.interceptors.firstWhere((i) => i is InterceptorsWrapper)
+              as InterceptorsWrapper;
+
       final options = RequestOptions(path: '/test');
       final handler = MockRequestInterceptorHandler();
 
-      interceptor.onRequest!(options, handler);
-      
+      interceptor.onRequest(options, handler);
+
       await Future.delayed(const Duration(milliseconds: 50));
 
       expect(options.headers['Authorization'], 'Bearer fake-jwt-token');
       verify(() => handler.next(options)).called(1);
     });
 
-    test('does not inject Authorization header if token does not exist', () async {
-      final container = ProviderContainer(
-        overrides: [
-          secureStorageServiceProvider.overrideWithValue(mockStorage),
-        ],
-      );
+    test(
+      'does not inject Authorization header if token does not exist',
+      () async {
+        final container = ProviderContainer(
+          overrides: [
+            secureStorageServiceProvider.overrideWithValue(mockStorage),
+          ],
+        );
 
-      when(() => mockStorage.getToken()).thenAnswer((_) async => null);
+        when(() => mockStorage.getToken()).thenAnswer((_) async => null);
 
-      final dio = container.read(dioClientProvider);
-      
-      final interceptor = dio.interceptors.firstWhere((i) => i is InterceptorsWrapper) as InterceptorsWrapper;
-      
-      final options = RequestOptions(path: '/test');
-      final handler = MockRequestInterceptorHandler();
+        final dio = container.read(dioClientProvider);
 
-      interceptor.onRequest!(options, handler);
-      
-      await Future.delayed(const Duration(milliseconds: 50));
+        final interceptor =
+            dio.interceptors.firstWhere((i) => i is InterceptorsWrapper)
+                as InterceptorsWrapper;
 
-      expect(options.headers.containsKey('Authorization'), isFalse);
-      verify(() => handler.next(options)).called(1);
-    });
+        final options = RequestOptions(path: '/test');
+        final handler = MockRequestInterceptorHandler();
+
+        interceptor.onRequest(options, handler);
+
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        expect(options.headers.containsKey('Authorization'), isFalse);
+        verify(() => handler.next(options)).called(1);
+      },
+    );
   });
 }

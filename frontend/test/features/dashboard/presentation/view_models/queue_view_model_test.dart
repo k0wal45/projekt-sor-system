@@ -70,17 +70,18 @@ void main() {
 
       final streamData = [
         [admissionInQueue1, admissionInConsultation],
-        [admissionInQueue1, admissionInQueue2, admissionInConsultation]
+        [admissionInQueue1, admissionInQueue2, admissionInConsultation],
       ];
 
-      when(() => mockWebSocketService.queueStream)
-          .thenAnswer((_) => Stream.fromIterable(streamData));
+      when(
+        () => mockWebSocketService.queueStream,
+      ).thenAnswer((_) => Stream.fromIterable(streamData));
 
       // We need to listen to the provider to keep it alive
-      final subscription = container.listen(queueViewModelProvider, (_, __) {});
+      final subscription = container.listen(queueViewModelProvider, (_, _) {});
 
       final list = await container.read(queueViewModelProvider.future);
-      
+
       expect(list, isNotEmpty);
       expect(list.contains(admissionInQueue1), isTrue);
 
@@ -94,10 +95,11 @@ void main() {
         [admissionInQueue1, admissionInConsultation],
       ];
 
-      when(() => mockWebSocketService.queueStream)
-          .thenAnswer((_) => Stream.fromIterable(streamData));
+      when(
+        () => mockWebSocketService.queueStream,
+      ).thenAnswer((_) => Stream.fromIterable(streamData));
 
-      final subscription = container.listen(visibleQueueProvider, (_, __) {});
+      final subscription = container.listen(visibleQueueProvider, (_, _) {});
 
       final result = await container.read(visibleQueueProvider.future);
 

@@ -16,9 +16,7 @@ void main() {
   setUp(() {
     mockRepository = MockPatientRepository();
     container = ProviderContainer(
-      overrides: [
-        patientRepositoryProvider.overrideWithValue(mockRepository),
-      ],
+      overrides: [patientRepositoryProvider.overrideWithValue(mockRepository)],
     );
   });
 
@@ -33,7 +31,9 @@ void main() {
     });
 
     test('setQuery updates state', () {
-      container.read(patientSelectionQueryProvider.notifier).setQuery('Kowalski');
+      container
+          .read(patientSelectionQueryProvider.notifier)
+          .setQuery('Kowalski');
       final query = container.read(patientSelectionQueryProvider);
       expect(query, 'Kowalski');
     });
@@ -59,14 +59,20 @@ void main() {
 
     test('returns empty list if query length is less than 3', () async {
       // Arrange
-      when(() => mockRepository.getPatients(query: any(named: 'query')))
-          .thenAnswer((_) async => right([]));
-          
+      when(
+        () => mockRepository.getPatients(query: any(named: 'query')),
+      ).thenAnswer((_) async => right([]));
+
       // Act
-      final subscription = container.listen(patientSelectionSearchProvider, (_, __) {});
+      final subscription = container.listen(
+        patientSelectionSearchProvider,
+        (_, _) {},
+      );
       container.read(patientSelectionQueryProvider.notifier).setQuery('Ko');
-      
-      final result = await container.read(patientSelectionSearchProvider.future);
+
+      final result = await container.read(
+        patientSelectionSearchProvider.future,
+      );
 
       // Assert
       expect(result, isEmpty);
@@ -76,49 +82,66 @@ void main() {
       subscription.close();
     });
 
-    test('returns patients list if query length is >= 3 and repository succeeds', () async {
-      // Arrange
-      when(() => mockRepository.getPatients(query: any(named: 'query')))
-          .thenAnswer((_) async => right([testPatientEntity]));
+    test(
+      'returns patients list if query length is >= 3 and repository succeeds',
+      () async {
+        // Arrange
+        when(
+          () => mockRepository.getPatients(query: any(named: 'query')),
+        ).thenAnswer((_) async => right([testPatientEntity]));
 
-      // Act
-      final subscription = container.listen(patientSelectionSearchProvider, (_, __) {});
-      // initial load
-      await container.read(patientSelectionSearchProvider.future);
-      
-      container.read(patientSelectionQueryProvider.notifier).setQuery('Kowalski');
-      
-      // wait for debounce
-      await Future.delayed(const Duration(milliseconds: 600));
-      final result = await container.read(patientSelectionSearchProvider.future);
+        // Act
+        final subscription = container.listen(
+          patientSelectionSearchProvider,
+          (_, _) {},
+        );
+        // initial load
+        await container.read(patientSelectionSearchProvider.future);
 
-      // Assert
-      expect(result, isNotEmpty);
-      expect(result.first.lastName, 'Kowalski');
-      verify(() => mockRepository.getPatients(query: 'Kowalski')).called(1);
-      subscription.close();
-    });
+        container
+            .read(patientSelectionQueryProvider.notifier)
+            .setQuery('Kowalski');
+
+        // wait for debounce
+        await Future.delayed(const Duration(milliseconds: 600));
+        final result = await container.read(
+          patientSelectionSearchProvider.future,
+        );
+
+        // Assert
+        expect(result, isNotEmpty);
+        expect(result.first.lastName, 'Kowalski');
+        verify(() => mockRepository.getPatients(query: 'Kowalski')).called(1);
+        subscription.close();
+      },
+    );
 
     test('throws exception if repository returns Left', () async {
       // Arrange
-      when(() => mockRepository.getPatients(query: 'Kowalski'))
-          .thenAnswer((_) async => left<String, List<PatientEntity>>('Błąd serwera'));
+      when(() => mockRepository.getPatients(query: 'Kowalski')).thenAnswer(
+        (_) async => left<String, List<PatientEntity>>('Błąd serwera'),
+      );
 
       // Act
       // Set query BEFORE listening, so it starts with 'Kowalski' immediately
-      container.read(patientSelectionQueryProvider.notifier).setQuery('Kowalski');
-      
-      final subscription = container.listen(patientSelectionSearchProvider, (_, __) {});
-      
+      container
+          .read(patientSelectionQueryProvider.notifier)
+          .setQuery('Kowalski');
+
+      final subscription = container.listen(
+        patientSelectionSearchProvider,
+        (_, _) {},
+      );
+
       // wait for debounce
       await Future.delayed(const Duration(milliseconds: 600));
 
       final state = container.read(patientSelectionSearchProvider);
-      
+
       // Assert
       expect(state.hasError, isTrue);
       expect(state.error.toString(), contains('Błąd serwera'));
-      
+
       verify(() => mockRepository.getPatients(query: 'Kowalski')).called(1);
       subscription.close();
     });

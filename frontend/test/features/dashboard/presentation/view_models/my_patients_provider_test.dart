@@ -11,6 +11,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAdmissionRepository extends Mock implements AdmissionRepository {}
+
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
@@ -101,52 +102,65 @@ void main() {
 
       // authViewModelProvider starts with initial state depending on repo.getMe() or just null
       // Let's mock getMe to return error so user is null
-      when(() => mockAuthRepo.getMe())
-          .thenAnswer((_) async => left('No user'));
+      when(() => mockAuthRepo.getMe()).thenAnswer((_) async => left('No user'));
 
-      final subscription = container.listen(myPatientsProvider, (_, __) {});
-      
+      final subscription = container.listen(myPatientsProvider, (_, _) {});
+
       // wait for auth
-      await container.read(authViewModelProvider.future).catchError((_) => null);
+      await container
+          .read(authViewModelProvider.future)
+          .catchError((_) => null);
 
       final result = await container.read(myPatientsProvider.future);
 
       expect(result, isEmpty);
-      verifyNever(() => mockAdmissionRepo.getAdmissions(status: any(named: 'status')));
+      verifyNever(
+        () => mockAdmissionRepo.getAdmissions(status: any(named: 'status')),
+      );
       subscription.close();
     });
 
     test('returns empty list if user is not a doctor', () async {
       final container = createContainer();
 
-      when(() => mockAuthRepo.getMe())
-          .thenAnswer((_) async => right(testNurse));
+      when(
+        () => mockAuthRepo.getMe(),
+      ).thenAnswer((_) async => right(testNurse));
 
-      final subscription = container.listen(myPatientsProvider, (_, __) {});
-      
+      final subscription = container.listen(myPatientsProvider, (_, _) {});
+
       await container.read(authViewModelProvider.future);
 
       final result = await container.read(myPatientsProvider.future);
 
       expect(result, isEmpty);
-      verifyNever(() => mockAdmissionRepo.getAdmissions(status: any(named: 'status')));
+      verifyNever(
+        () => mockAdmissionRepo.getAdmissions(status: any(named: 'status')),
+      );
       subscription.close();
     });
 
     test('returns admissions filtered by current doctor id', () async {
       final container = createContainer();
 
-      when(() => mockAuthRepo.getMe())
-          .thenAnswer((_) async => right(testDoctor));
+      when(
+        () => mockAuthRepo.getMe(),
+      ).thenAnswer((_) async => right(testDoctor));
 
-      when(() => mockAdmissionRepo.getAdmissions(status: AdmissionStatus.inConsultation))
-          .thenAnswer((_) async => right([admission1, admission3]));
+      when(
+        () => mockAdmissionRepo.getAdmissions(
+          status: AdmissionStatus.inConsultation,
+        ),
+      ).thenAnswer((_) async => right([admission1, admission3]));
 
-      when(() => mockAdmissionRepo.getAdmissions(status: AdmissionStatus.waitingForResults))
-          .thenAnswer((_) async => right([admission2]));
+      when(
+        () => mockAdmissionRepo.getAdmissions(
+          status: AdmissionStatus.waitingForResults,
+        ),
+      ).thenAnswer((_) async => right([admission2]));
 
-      final subscription = container.listen(myPatientsProvider, (_, __) {});
-      
+      final subscription = container.listen(myPatientsProvider, (_, _) {});
+
       await container.read(authViewModelProvider.future);
 
       final result = await container.read(myPatientsProvider.future);
@@ -154,7 +168,10 @@ void main() {
       expect(result.length, 2);
       expect(result.contains(admission1), isTrue);
       expect(result.contains(admission2), isTrue);
-      expect(result.contains(admission3), isFalse); // filtered out because doctorId != 1
+      expect(
+        result.contains(admission3),
+        isFalse,
+      ); // filtered out because doctorId != 1
 
       subscription.close();
     });
@@ -162,17 +179,24 @@ void main() {
     test('throws exception if getAdmissions returns error', () async {
       final container = createContainer();
 
-      when(() => mockAuthRepo.getMe())
-          .thenAnswer((_) async => right(testDoctor));
+      when(
+        () => mockAuthRepo.getMe(),
+      ).thenAnswer((_) async => right(testDoctor));
 
-      when(() => mockAdmissionRepo.getAdmissions(status: AdmissionStatus.inConsultation))
-          .thenAnswer((_) async => left('Błąd API'));
+      when(
+        () => mockAdmissionRepo.getAdmissions(
+          status: AdmissionStatus.inConsultation,
+        ),
+      ).thenAnswer((_) async => left('Błąd API'));
 
-      when(() => mockAdmissionRepo.getAdmissions(status: AdmissionStatus.waitingForResults))
-          .thenAnswer((_) async => right([admission2]));
+      when(
+        () => mockAdmissionRepo.getAdmissions(
+          status: AdmissionStatus.waitingForResults,
+        ),
+      ).thenAnswer((_) async => right([admission2]));
 
-      final subscription = container.listen(myPatientsProvider, (_, __) {});
-      
+      final subscription = container.listen(myPatientsProvider, (_, _) {});
+
       await container.read(authViewModelProvider.future);
 
       // Try to read future but catch immediately, or just read the state after a short delay

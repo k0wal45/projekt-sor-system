@@ -10,6 +10,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockPatientRepository extends Mock implements PatientRepository {}
+
 class MockStaffRepository extends Mock implements StaffRepository {}
 
 void main() {
@@ -81,50 +82,63 @@ void main() {
     test('SortOrderNotifier toggle changes state', () {
       final container = createContainer();
       expect(container.read(sortOrderProvider), SortOrder.ascending);
-      
+
       container.read(sortOrderProvider.notifier).toggle();
       expect(container.read(sortOrderProvider), SortOrder.descending);
     });
 
-    test('fetchedPatients returns empty list if query length is less than 3', () async {
-      final container = createContainer();
-      container.read(searchQueryProvider.notifier).setQuery('ab');
+    test(
+      'fetchedPatients returns empty list if query length is less than 3',
+      () async {
+        final container = createContainer();
+        container.read(searchQueryProvider.notifier).setQuery('ab');
 
-      final result = await container.read(fetchedPatientsProvider.future);
+        final result = await container.read(fetchedPatientsProvider.future);
 
-      expect(result, isEmpty);
-      verifyNever(() => mockPatientRepo.getPatients(query: any(named: 'query')));
-    });
+        expect(result, isEmpty);
+        verifyNever(
+          () => mockPatientRepo.getPatients(query: any(named: 'query')),
+        );
+      },
+    );
 
-    test('fetchedPatients returns patients list if query length is >= 3 and repository succeeds', () async {
-      final container = createContainer();
-      when(() => mockPatientRepo.getPatients(query: 'aba'))
-          .thenAnswer((_) async => right([patientA, patientB]));
+    test(
+      'fetchedPatients returns patients list if query length is >= 3 and repository succeeds',
+      () async {
+        final container = createContainer();
+        when(
+          () => mockPatientRepo.getPatients(query: 'aba'),
+        ).thenAnswer((_) async => right([patientA, patientB]));
 
-      container.read(searchQueryProvider.notifier).setQuery('aba');
-      
-      final subscription = container.listen(fetchedPatientsProvider, (_, __) {});
-      
-      await Future.delayed(const Duration(milliseconds: 600));
+        container.read(searchQueryProvider.notifier).setQuery('aba');
 
-      final result = await container.read(fetchedPatientsProvider.future);
+        final subscription = container.listen(
+          fetchedPatientsProvider,
+          (_, _) {},
+        );
 
-      expect(result.length, 2);
-      expect(result, contains(patientA));
-      
-      verify(() => mockPatientRepo.getPatients(query: 'aba')).called(1);
-      subscription.close();
-    });
+        await Future.delayed(const Duration(milliseconds: 600));
+
+        final result = await container.read(fetchedPatientsProvider.future);
+
+        expect(result.length, 2);
+        expect(result, contains(patientA));
+
+        verify(() => mockPatientRepo.getPatients(query: 'aba')).called(1);
+        subscription.close();
+      },
+    );
 
     test('PatientsSearch sorts patients correctly', () async {
       final container = createContainer();
-      when(() => mockPatientRepo.getPatients(query: 'aba'))
-          .thenAnswer((_) async => right([patientB, patientA])); // Return out of order
+      when(() => mockPatientRepo.getPatients(query: 'aba')).thenAnswer(
+        (_) async => right([patientB, patientA]),
+      ); // Return out of order
 
       container.read(searchQueryProvider.notifier).setQuery('aba');
-      
-      final subscription = container.listen(patientsSearchProvider, (_, __) {});
-      
+
+      final subscription = container.listen(patientsSearchProvider, (_, _) {});
+
       await Future.delayed(const Duration(milliseconds: 600));
 
       // Ascending
@@ -134,7 +148,7 @@ void main() {
 
       // Toggle to Descending
       container.read(sortOrderProvider.notifier).toggle();
-      
+
       result = await container.read(patientsSearchProvider.future);
       expect(result.first.lastName, 'Babacki');
       expect(result.last.lastName, 'Abacki');
@@ -142,45 +156,53 @@ void main() {
       subscription.close();
     });
 
-    test('fetchedStaff returns empty list if query length is less than 3', () async {
-      final container = createContainer();
-      container.read(searchQueryProvider.notifier).setQuery('ab');
+    test(
+      'fetchedStaff returns empty list if query length is less than 3',
+      () async {
+        final container = createContainer();
+        container.read(searchQueryProvider.notifier).setQuery('ab');
 
-      final result = await container.read(fetchedStaffProvider.future);
+        final result = await container.read(fetchedStaffProvider.future);
 
-      expect(result, isEmpty);
-      verifyNever(() => mockStaffRepo.getStaff(query: any(named: 'query')));
-    });
+        expect(result, isEmpty);
+        verifyNever(() => mockStaffRepo.getStaff(query: any(named: 'query')));
+      },
+    );
 
-    test('fetchedStaff returns staff list if query length is >= 3 and repository succeeds', () async {
-      final container = createContainer();
-      when(() => mockStaffRepo.getStaff(query: 'aba'))
-          .thenAnswer((_) async => right([staffA, staffB]));
+    test(
+      'fetchedStaff returns staff list if query length is >= 3 and repository succeeds',
+      () async {
+        final container = createContainer();
+        when(
+          () => mockStaffRepo.getStaff(query: 'aba'),
+        ).thenAnswer((_) async => right([staffA, staffB]));
 
-      container.read(searchQueryProvider.notifier).setQuery('aba');
-      
-      final subscription = container.listen(fetchedStaffProvider, (_, __) {});
-      
-      await Future.delayed(const Duration(milliseconds: 600));
+        container.read(searchQueryProvider.notifier).setQuery('aba');
 
-      final result = await container.read(fetchedStaffProvider.future);
+        final subscription = container.listen(fetchedStaffProvider, (_, _) {});
 
-      expect(result.length, 2);
-      expect(result, contains(staffA));
-      
-      verify(() => mockStaffRepo.getStaff(query: 'aba')).called(1);
-      subscription.close();
-    });
+        await Future.delayed(const Duration(milliseconds: 600));
+
+        final result = await container.read(fetchedStaffProvider.future);
+
+        expect(result.length, 2);
+        expect(result, contains(staffA));
+
+        verify(() => mockStaffRepo.getStaff(query: 'aba')).called(1);
+        subscription.close();
+      },
+    );
 
     test('StaffSearch sorts staff correctly', () async {
       final container = createContainer();
-      when(() => mockStaffRepo.getStaff(query: 'aba'))
-          .thenAnswer((_) async => right([staffB, staffA])); // Return out of order
+      when(
+        () => mockStaffRepo.getStaff(query: 'aba'),
+      ).thenAnswer((_) async => right([staffB, staffA])); // Return out of order
 
       container.read(searchQueryProvider.notifier).setQuery('aba');
-      
-      final subscription = container.listen(staffSearchProvider, (_, __) {});
-      
+
+      final subscription = container.listen(staffSearchProvider, (_, _) {});
+
       await Future.delayed(const Duration(milliseconds: 600));
 
       // Ascending
@@ -190,7 +212,7 @@ void main() {
 
       // Toggle to Descending
       container.read(sortOrderProvider.notifier).toggle();
-      
+
       result = await container.read(staffSearchProvider.future);
       expect(result.first.lastName, 'Babacki');
       expect(result.last.lastName, 'Abacki');
