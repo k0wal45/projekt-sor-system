@@ -36,7 +36,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final token = response.data['token'] as String;
       await _storage.saveToken(token);
 
-      final userJson = response.data['user'] as Map<String, dynamic>;
+      final userJson = Map<String, dynamic>.from(response.data['user'] as Map<String, dynamic>);
       // Backend might omit academic_title and email in login response
       userJson['academic_title'] = userJson['academic_title'] ?? '';
       userJson['login_email'] = userJson['login_email'] ?? userJson['email'] ?? email;
@@ -62,7 +62,7 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       final response = await _dio.get('/auth/me');
-      final userJson = response.data as Map<String, dynamic>;
+      final userJson = Map<String, dynamic>.from(response.data as Map<String, dynamic>);
       // Map 'email' to 'login_email' since StaffEntity uses 'login_email' key
       userJson['login_email'] = userJson['login_email'] ?? userJson['email'] ?? '';
       userJson['academic_title'] = userJson['academic_title'] ?? '';

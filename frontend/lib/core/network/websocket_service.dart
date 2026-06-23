@@ -32,8 +32,10 @@ class WebSocketService {
   static const Duration _initialReconnectDelay = Duration(seconds: 2);
 
   List<AdmissionEntity>? _lastAdmissions;
+  final WebSocketChannel Function(Uri) _channelFactory;
 
-  WebSocketService(this._storage) {
+  WebSocketService(this._storage, {WebSocketChannel Function(Uri)? channelFactory}) 
+    : _channelFactory = channelFactory ?? ((uri) => WebSocketChannel.connect(uri)) {
     _admissionsController = StreamController<List<AdmissionEntity>>.broadcast();
   }
 
@@ -63,7 +65,7 @@ class WebSocketService {
         '$wsScheme://${uri.host}:${uri.port}${path}ws/admissions/queue$tokenQuery';
 
     try {
-      _channel = WebSocketChannel.connect(Uri.parse(wsUrlStr));
+      _channel = _channelFactory(Uri.parse(wsUrlStr));
 
       _channel!.stream.listen(
         (message) {

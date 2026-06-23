@@ -62,7 +62,7 @@ Future<List<PatientEntity>> fetchedPatients(Ref ref) async {
   final result = await repo.getPatients(query: query);
 
   return result.fold(
-    (err) => throw Exception(err),
+    (err) => Future.error(err),
     (patients) => patients,
   );
 }
@@ -97,7 +97,7 @@ Future<List<StaffEntity>> fetchedStaff(Ref ref) async {
   final result = await repo.getStaff(query: query);
 
   return result.fold(
-    (err) => throw Exception(err),
+    (err) => Future.error(err),
     (staff) => staff,
   );
 }

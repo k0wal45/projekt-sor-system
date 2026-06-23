@@ -49,7 +49,7 @@ Future<List<PatientEntity>> patientSelectionSearch(Ref ref) async {
   final result = await repo.getPatients(query: query);
 
   return result.fold(
-    (err) => throw Exception(err),
+    (err) => throw err,
     (patients) => patients,
   );
 }

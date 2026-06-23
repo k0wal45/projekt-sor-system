@@ -35,7 +35,7 @@ class AdmissionRepositoryImpl implements AdmissionRepository {
   Future<Either<String, AdmissionEntity>> createAdmission(
       TriageFormDto triageData, int priorityKtas, bool isAiPredicted) async {
     try {
-      final data = triageData.toJson();
+      final data = Map<String, dynamic>.from(triageData.toJson());
       data['priority_ktas'] = priorityKtas;
       data['is_ai_predicted'] = isAiPredicted;
 
