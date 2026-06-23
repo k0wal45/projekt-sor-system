@@ -44,6 +44,8 @@ func SetupRouter(r *gin.Engine) {
 			protected.POST("/admissions", controllers.CreateAdmission)
 			protected.GET("/ws/admissions/queue", controllers.StreamQueue)
 			protected.GET("/admissions", controllers.GetAdmissions)
+			protected.GET("/admissions/history", controllers.GetAdmissionsHistory)
+			
 			protected.GET("/admissions/:id", controllers.GetAdmissionByID)
 			protected.DELETE("/admissions/:id", controllers.CancelAdmission)
 			protected.PATCH("/admissions/:id/status", controllers.UpdateAdmissionStatus)

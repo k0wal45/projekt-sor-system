@@ -46,18 +46,34 @@ var PublicQueueHub = struct {
 	clients: make(map[*websocket.Conn]bool),
 }
 
-// Funkcja pomocnicza: Pobiera z bazy aktualny stan pełnej kolejki
-func fetchCurrentQueue() ([]models.Admission, error) {
-	var queue []models.Admission
-	err := config.DB.Where("status_przyjecia = ?", models.StatusWPoczekalni).
+// Funkcja pomocnicza: Pobiera z bazy aktualny stan pełnej kolejki i zwraca modele Patient
+func fetchCurrentQueue() ([]models.Patient, error) {
+	var admissions []models.Admission
+	
+	// Pobieramy aktywne przyjęcia z poczekalni, automatycznie dociągając relację Patient z bazy
+	err := config.DB.Preload("Patient").
+		Where("status_przyjecia = ?", models.StatusWPoczekalni).
 		Order("priority_ktas ASC, data_przyjecia ASC").
-		Find(&queue).Error
+		Find(&admissions).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Przepisujemy dociągnięte modele pacjentów do czystej tablicy wynikowej
+	var queue []models.Patient
+	for _, adm := range admissions {
+		queue = append(queue, adm.Patient)
+	}
+
 	return queue, err
 }
 
-// Funkcja pomocnicza: Pobiera i mapuje dane pod RODO dla pojedynczego ekranu TV
+// Funkcja pomocnicza: Pobiera i mapuje dane pod RODO dla pojedynczego ekranu TV (Nienaruszona struktura RODO)
 func fetchPublicQueueTickets() ([]PublicQueueTicket, error) {
 	var admissions []models.Admission
+	
+	// Pobieramy tylko kolumny ID i priorytetu, odrzucając dane osobowe pacjenta (RODO)
 	err := config.DB.Select("id", "priority_ktas").
 		Where("status_przyjecia = ?", models.StatusWPoczekalni).
 		Order("priority_ktas ASC, data_przyjecia ASC").

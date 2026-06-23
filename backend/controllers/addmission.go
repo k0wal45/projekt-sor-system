@@ -312,3 +312,49 @@ func UpdateAdmissionStatus(c *gin.Context) {
 		"status":  input.Status,
 	})
 }
+
+// Struktura DTO (Data Transfer Object) łącząca ID przyjęcia z pełnymi danymi pacjenta
+type AdmissionArchiveDTO struct {
+	AdmissionID     uint           `json:"id_przyjecia"`
+	PriorityKtas    int            `json:"priority_ktas"`
+	StatusAdmission string         `json:"status_przyjecia"`
+	AdmissionTime   time.Time      `json:"data_przyjecia"`
+	Patient         models.Patient `json:"pacjent"` // Pełny model pacjenta wewnątrz przyjęcia
+}
+
+// GET /api/admissions/history
+// Pobieranie archiwum wszystkich przyjęć wraz z pełnymi danymi pacjentów
+func GetAdmissionsHistory(c *gin.Context) {
+	var admissions []models.Admission
+
+	// Inicjalizujemy bazowe zapytanie GORM i automatycznie ładujemy (Preload) relację Patient
+	query := config.DB.Preload("Patient")
+
+	// Obsługa filtrów z Query Params (jeśli frontend przesyła filtry) [cite: 487]
+	if status := c.Query("status_przyjecia"); status != "" {
+		query = query.Where("status_przyjecia = ?", status)
+	}
+	if ktas := c.Query("priority_ktas"); ktas != "" {
+		query = query.Where("priority_ktas = ?", ktas)
+	}
+
+	// Pobieramy dane posortowane od najnowszych przyjęć
+	if err := query.Order("data_przyjecia DESC").Find(&admissions).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd podczas pobierania archiwum przyjęć"})
+		return
+	}
+
+	// Mapujemy pobrane rekordy na strukturę oczekiwaną przez frontend
+	var response []AdmissionArchiveDTO
+	for _, adm := range admissions {
+		response = append(response, AdmissionArchiveDTO{
+			AdmissionID:     adm.ID,
+			PriorityKtas:    adm.PriorityKtas,
+			StatusAdmission: string(adm.StatusAdmission),
+			AdmissionTime:   adm.AdmissionTime,
+			Patient:         adm.Patient, // Zawiera imię, nazwisko, PESEL itp.
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
+}
