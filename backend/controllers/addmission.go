@@ -1,9 +1,13 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/json"
 	"esor-backend/config"
 	"esor-backend/models"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,8 +30,21 @@ type TriageInput struct {
 	IsAiPredicted  bool                `json:"is_ai_predicted"`
 }
 
+// Funkcja pomocnicza obliczająca wiek na podstawie daty urodzenia
+func calculateAge(birthDate time.Time) int {
+	now := time.Now()
+	years := now.Year() - birthDate.Year()
+	if now.YearDay() < birthDate.YearDay() {
+		years--
+	}
+	if years < 0 {
+		return 0
+	}
+	return years
+}
+
 // POST /api/admissions/predict-ktas
-// Wstępna ocena stanu pacjenta przez algorytm / model AI
+// Wstępna ocena stanu pacjenta przez algorytm / model AI (Spięta z kontenerem sor_ai)
 func PredictKtas(c *gin.Context) {
 	// Struktura lokalna bez pola priority_ktas, zapobiegająca błędom walidacji braku priorytetu
 	var input struct {
@@ -51,17 +68,59 @@ func PredictKtas(c *gin.Context) {
 		return
 	}
 
-	// Heurystyka ratunkowa (mock przed spięciem HTTP z kontenerem AI w Pythonie)
-	suggestedKtas := 3 // Domyślnie kod żółty (pilny)
+	// 1. Pobranie danych pacjenta z bazy w celu wyliczenia wieku (wymaganego przez model AI)
+	var patient models.Patient
+	if err := config.DB.First(&patient, input.PatientID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Nie znaleziono pacjenta o podanym ID"})
+		return
+	}
+	age := calculateAge(patient.DateOfBirth)
 
-	if input.MentalStatus == models.MentalNieprzytomny || input.HR > 130 || input.SBP < 90 {
-		suggestedKtas = 1 // Kod czerwony (krytyczny, natychmiastowa reanimacja)
-	} else if input.PainLvl >= 8 || input.SBP > 180 {
-		suggestedKtas = 2 // Kod pomarańczowy (bardzo pilny)
+	// 2. Przygotowanie payloadu dla mikrousługi FastAPI (TriageRequest)
+	aiPayload := map[string]int{
+		"age":      age,
+		"hr":       input.HR,
+		"sbp":      input.SBP,
+		"dbp":      input.DBP,
+		"pain_lvl": input.PainLvl,
 	}
 
+	jsonPayload, err := json.Marshal(aiPayload)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd przetwarzania danych dla modułu AI"})
+		return
+	}
+
+	// 3. Wywołanie zewnętrznego endpointu kontenera AI po sieci mostkowej systemu Docker
+	aiServiceURL := "http://ai:8000/api/triage" // Port wewnątrz sieci to 8000 (zgodnie z definicją uvicorn/fastapi)
+	
+	resp, err := http.Post(aiServiceURL, "application/json", bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Mikrousługa analityczna AI jest obecnie nieosiągalna"})
+		return
+	}
+	defer resp.Body.Close()
+
+	// Obsługa błędów zwróconych przez FastAPI (np. 503 gdy brak pliku pickle lub 500)
+	if resp.StatusCode != http.StatusOK {
+		var aiError map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&aiError)
+		c.JSON(resp.StatusCode, gin.H{"error": fmt.Sprintf("Błąd modułu AI: %v", aiError["detail"])})
+		return
+	}
+
+	// 4. Dekodowanie odpowiedzi z modelu (TriageResponse)
+	var aiResponse struct {
+		PriorityLevel int `json:"priority_level"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&aiResponse); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Niepoprawny format odpowiedzi z serwera AI"})
+		return
+	}
+
+	// 5. Zwrócenie danych wyjściowych w dokładnie niezmienionym formacie (zgodnym z Twoim dotychczasowym API)
 	c.JSON(http.StatusOK, gin.H{
-		"suggested_priority_ktas": suggestedKtas,
+		"suggested_priority_ktas": aiResponse.PriorityLevel,
 		"is_ai_predicted":         true,
 	})
 }
