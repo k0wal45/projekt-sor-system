@@ -19,7 +19,7 @@ void main() {
   group('AdmissionRepositoryImpl', () {
     final testTriageDto = TriageFormDto(
       patientId: 1,
-      arrivalMode: ArrivalMode.pieszo,
+      arrivalMode: ArrivalMode.onFoot,
       injury: false,
       mentalStatus: MentalStatus.fullyConscious,
       pain: false,
@@ -56,14 +56,18 @@ void main() {
     group('predictKtas', () {
       test('returns Right(ktas) on success', () async {
         // Arrange
-        when(() => mockDio.post(
-              '/admissions/predict-ktas',
-              data: any(named: 'data'),
-            )).thenAnswer((_) async => Response(
-              requestOptions: RequestOptions(path: '/admissions/predict-ktas'),
-              data: {'suggested_priority_ktas': 3},
-              statusCode: 200,
-            ));
+        when(
+          () => mockDio.post(
+            '/admissions/predict-ktas',
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            requestOptions: RequestOptions(path: '/admissions/predict-ktas'),
+            data: {'suggested_priority_ktas': 3},
+            statusCode: 200,
+          ),
+        );
 
         // Act
         final result = await repository.predictKtas(testTriageDto);
@@ -78,10 +82,12 @@ void main() {
 
       test('returns Left on error', () async {
         // Arrange
-        when(() => mockDio.post(
-              '/admissions/predict-ktas',
-              data: any(named: 'data'),
-            )).thenThrow(Exception('API failure'));
+        when(
+          () => mockDio.post(
+            '/admissions/predict-ktas',
+            data: any(named: 'data'),
+          ),
+        ).thenThrow(Exception('API failure'));
 
         // Act
         final result = await repository.predictKtas(testTriageDto);
@@ -98,36 +104,33 @@ void main() {
     group('createAdmission', () {
       test('returns Right(AdmissionEntity) on success', () async {
         // Arrange
-        when(() => mockDio.post(
-              '/admissions',
-              data: any(named: 'data'),
-            )).thenAnswer((_) async => Response(
-              requestOptions: RequestOptions(path: '/admissions'),
-              data: {'admission': testAdmissionJson},
-              statusCode: 200,
-            ));
+        when(
+          () => mockDio.post('/admissions', data: any(named: 'data')),
+        ).thenAnswer(
+          (_) async => Response(
+            requestOptions: RequestOptions(path: '/admissions'),
+            data: {'admission': testAdmissionJson},
+            statusCode: 200,
+          ),
+        );
 
         // Act
         final result = await repository.createAdmission(testTriageDto, 3, true);
 
         // Assert
         expect(result.isRight(), isTrue);
-        result.fold(
-          (l) => fail('Should not return left'),
-          (admission) {
-            expect(admission.id, 1);
-            expect(admission.priorityKtas, 3);
-            expect(admission.status, AdmissionStatus.inQueue);
-          },
-        );
+        result.fold((l) => fail('Should not return left'), (admission) {
+          expect(admission.id, 1);
+          expect(admission.priorityKtas, 3);
+          expect(admission.status, AdmissionStatus.inQueue);
+        });
       });
 
       test('returns Left on error', () async {
         // Arrange
-        when(() => mockDio.post(
-              '/admissions',
-              data: any(named: 'data'),
-            )).thenThrow(Exception('Failed to create'));
+        when(
+          () => mockDio.post('/admissions', data: any(named: 'data')),
+        ).thenThrow(Exception('Failed to create'));
 
         // Act
         final result = await repository.createAdmission(testTriageDto, 3, true);
@@ -144,35 +147,38 @@ void main() {
     group('getAdmissions', () {
       test('returns Right(List<AdmissionEntity>) on success', () async {
         // Arrange
-        when(() => mockDio.get(
-              '/admissions',
-              queryParameters: any(named: 'queryParameters'),
-            )).thenAnswer((_) async => Response(
-              requestOptions: RequestOptions(path: '/admissions'),
-              data: [testAdmissionJson],
-              statusCode: 200,
-            ));
+        when(
+          () => mockDio.get(
+            '/admissions',
+            queryParameters: any(named: 'queryParameters'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            requestOptions: RequestOptions(path: '/admissions'),
+            data: [testAdmissionJson],
+            statusCode: 200,
+          ),
+        );
 
         // Act
         final result = await repository.getAdmissions();
 
         // Assert
         expect(result.isRight(), isTrue);
-        result.fold(
-          (l) => fail('Should not return left'),
-          (list) {
-            expect(list.length, 1);
-            expect(list.first.id, 1);
-          },
-        );
+        result.fold((l) => fail('Should not return left'), (list) {
+          expect(list.length, 1);
+          expect(list.first.id, 1);
+        });
       });
 
       test('returns Left on error', () async {
         // Arrange
-        when(() => mockDio.get(
-              '/admissions',
-              queryParameters: any(named: 'queryParameters'),
-            )).thenThrow(Exception('Failed to fetch'));
+        when(
+          () => mockDio.get(
+            '/admissions',
+            queryParameters: any(named: 'queryParameters'),
+          ),
+        ).thenThrow(Exception('Failed to fetch'));
 
         // Act
         final result = await repository.getAdmissions();

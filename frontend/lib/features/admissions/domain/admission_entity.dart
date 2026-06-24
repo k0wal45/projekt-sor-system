@@ -1,24 +1,35 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../patients/domain/patient_entity.dart';
+
 part 'admission_entity.freezed.dart';
 part 'admission_entity.g.dart';
 
 enum ArrivalMode {
-  @JsonValue('Pieszo') pieszo('Pieszo'),
-  @JsonValue('Karetka publiczna') karetkaPubliczna('Karetka publiczna'),
-  @JsonValue('Pojazd prywatny') pojazdPrywatny('Pojazd prywatny'),
-  @JsonValue('Karetka prywatna') karetkaPrywatna('Karetka prywatna'),
-  @JsonValue('Inne') inne('Inne');
+  @JsonValue('Pieszo')
+  onFoot('Pieszo'),
+  @JsonValue('Karetka publiczna')
+  publicAmbulance('Karetka publiczna'),
+  @JsonValue('Pojazd prywatny')
+  privateVehicle('Pojazd prywatny'),
+  @JsonValue('Karetka prywatna')
+  privateAmbulance('Karetka prywatna'),
+  @JsonValue('Inne')
+  other('Inne');
 
   final String value;
   const ArrivalMode(this.value);
 }
 
 enum MentalStatus {
-  @JsonValue('W pełni świadomy') fullyConscious('W pełni świadomy'),
-  @JsonValue('Reaguje na głos') reactsToVoice('Reaguje na głos'),
-  @JsonValue('Reaguje tylko na ból') reactsToPain('Reaguje tylko na ból'),
-  @JsonValue('Nieprzytomny/Brak reakcji') unresponsive('Nieprzytomny/Brak reakcji');
+  @JsonValue('W pełni świadomy')
+  fullyConscious('W pełni świadomy'),
+  @JsonValue('Reaguje na głos')
+  reactsToVoice('Reaguje na głos'),
+  @JsonValue('Reaguje tylko na ból')
+  reactsToPain('Reaguje tylko na ból'),
+  @JsonValue('Nieprzytomny/Brak reakcji')
+  unresponsive('Nieprzytomny/Brak reakcji');
 
   final String value;
   const MentalStatus(this.value);
@@ -60,6 +71,7 @@ abstract class AdmissionEntity with _$AdmissionEntity {
     @JsonKey(name: 'priority_ktas') required int priorityKtas,
     @JsonKey(name: 'is_ai_predicted') required bool isAiPredicted,
     @JsonKey(name: 'status_przyjecia') required AdmissionStatus status,
+    PatientEntity? patient,
   }) = _AdmissionEntity;
 
   factory AdmissionEntity.fromJson(Map<String, dynamic> json) =>

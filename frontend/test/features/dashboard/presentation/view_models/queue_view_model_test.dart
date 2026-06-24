@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:esor/core/network/websocket_service.dart';
 import 'package:esor/features/admissions/domain/admission_entity.dart';
 import 'package:esor/features/dashboard/presentation/view_models/queue_view_model.dart';
+import 'package:esor/features/patients/domain/patient_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -33,7 +35,7 @@ void main() {
         registrarId: 1,
         doctorId: 1,
         admissionDate: DateTime.now(),
-        arrivalMode: ArrivalMode.karetkaPubliczna,
+        arrivalMode: ArrivalMode.publicAmbulance,
         injury: false,
         mentalStatus: MentalStatus.fullyConscious,
         pain: false,
@@ -47,6 +49,22 @@ void main() {
         priorityKtas: 3,
         isAiPredicted: false,
         status: status,
+        patient: PatientEntity(
+          id: id,
+          firstName: '',
+          lastName: '',
+          pesel: '',
+          birthDate: DateTime.now(),
+          gender: Gender.m,
+          address: '',
+          phone: '',
+          email: '',
+          emergencyContactName: '',
+          emergencyContactPhone: '',
+          bloodGroup: null,
+          allergies: '',
+          chronicDiseases: '',
+        ),
       );
     }
 
@@ -88,25 +106,35 @@ void main() {
       subscription.close();
     });
 
-    test('visibleQueue filters only admissions with inQueue status', () async {
-      final container = createContainer();
+    test(
+      'QueueViewModel propagates error from WebSocketService stream',
+      () async {
+        final container = createContainer();
 
-      final streamData = [
-        [admissionInQueue1, admissionInConsultation],
-      ];
+        final controller = StreamController<List<AdmissionEntity>>.broadcast();
+        when(
+          () => mockWebSocketService.queueStream,
+        ).thenAnswer((_) => controller.stream);
 
-      when(
-        () => mockWebSocketService.queueStream,
-      ).thenAnswer((_) => Stream.fromIterable(streamData));
+        final subscription = container.listen(
+          queueViewModelProvider,
+          (_, _) {},
+        );
 
-      final subscription = container.listen(visibleQueueProvider, (_, _) {});
+        // Verify initial state is loading
+        expect(container.read(queueViewModelProvider).isLoading, isTrue);
 
-      final result = await container.read(visibleQueueProvider.future);
+        controller.addError('test error');
 
-      expect(result.length, 1);
-      expect(result.first, equals(admissionInQueue1));
+        // Allow microtasks to run
+        await Future.microtask(() {});
 
-      subscription.close();
-    });
+        final state = container.read(queueViewModelProvider);
+        expect(state.hasError, isTrue);
+        expect(state.error, equals('test error'));
+
+        subscription.close();
+      },
+    );
   });
 }

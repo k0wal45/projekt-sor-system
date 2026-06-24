@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AdmissionEntity {
 
- int get id;@JsonKey(name: 'id_pacjenta') int get patientId;@JsonKey(name: 'id_osoby_przyjmujacej') int get registrarId;@JsonKey(name: 'id_lekarza_prowadzacego') int? get doctorId;@JsonKey(name: 'data_przyjecia') DateTime get admissionDate;@JsonKey(name: 'forma_przybycia') ArrivalMode get arrivalMode; bool get injury;@JsonKey(name: 'mental_status') MentalStatus get mentalStatus; bool get pain;@JsonKey(name: 'pain_lvl') int get painLevel; int get hr; int get sbp; int get dbp; int get rr; double get bt;@JsonKey(name: 'chief_complaint') String get chiefComplaint;@JsonKey(name: 'priority_ktas') int get priorityKtas;@JsonKey(name: 'is_ai_predicted') bool get isAiPredicted;@JsonKey(name: 'status_przyjecia') AdmissionStatus get status;
+ int get id;@JsonKey(name: 'id_pacjenta') int get patientId;@JsonKey(name: 'id_osoby_przyjmujacej') int get registrarId;@JsonKey(name: 'id_lekarza_prowadzacego') int? get doctorId;@JsonKey(name: 'data_przyjecia') DateTime get admissionDate;@JsonKey(name: 'forma_przybycia') ArrivalMode get arrivalMode; bool get injury;@JsonKey(name: 'mental_status') MentalStatus get mentalStatus; bool get pain;@JsonKey(name: 'pain_lvl') int get painLevel; int get hr; int get sbp; int get dbp; int get rr; double get bt;@JsonKey(name: 'chief_complaint') String get chiefComplaint;@JsonKey(name: 'priority_ktas') int get priorityKtas;@JsonKey(name: 'is_ai_predicted') bool get isAiPredicted;@JsonKey(name: 'status_przyjecia') AdmissionStatus get status; PatientEntity? get patient;
 /// Create a copy of AdmissionEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $AdmissionEntityCopyWith<AdmissionEntity> get copyWith => _$AdmissionEntityCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdmissionEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.registrarId, registrarId) || other.registrarId == registrarId)&&(identical(other.doctorId, doctorId) || other.doctorId == doctorId)&&(identical(other.admissionDate, admissionDate) || other.admissionDate == admissionDate)&&(identical(other.arrivalMode, arrivalMode) || other.arrivalMode == arrivalMode)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.mentalStatus, mentalStatus) || other.mentalStatus == mentalStatus)&&(identical(other.pain, pain) || other.pain == pain)&&(identical(other.painLevel, painLevel) || other.painLevel == painLevel)&&(identical(other.hr, hr) || other.hr == hr)&&(identical(other.sbp, sbp) || other.sbp == sbp)&&(identical(other.dbp, dbp) || other.dbp == dbp)&&(identical(other.rr, rr) || other.rr == rr)&&(identical(other.bt, bt) || other.bt == bt)&&(identical(other.chiefComplaint, chiefComplaint) || other.chiefComplaint == chiefComplaint)&&(identical(other.priorityKtas, priorityKtas) || other.priorityKtas == priorityKtas)&&(identical(other.isAiPredicted, isAiPredicted) || other.isAiPredicted == isAiPredicted)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdmissionEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.registrarId, registrarId) || other.registrarId == registrarId)&&(identical(other.doctorId, doctorId) || other.doctorId == doctorId)&&(identical(other.admissionDate, admissionDate) || other.admissionDate == admissionDate)&&(identical(other.arrivalMode, arrivalMode) || other.arrivalMode == arrivalMode)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.mentalStatus, mentalStatus) || other.mentalStatus == mentalStatus)&&(identical(other.pain, pain) || other.pain == pain)&&(identical(other.painLevel, painLevel) || other.painLevel == painLevel)&&(identical(other.hr, hr) || other.hr == hr)&&(identical(other.sbp, sbp) || other.sbp == sbp)&&(identical(other.dbp, dbp) || other.dbp == dbp)&&(identical(other.rr, rr) || other.rr == rr)&&(identical(other.bt, bt) || other.bt == bt)&&(identical(other.chiefComplaint, chiefComplaint) || other.chiefComplaint == chiefComplaint)&&(identical(other.priorityKtas, priorityKtas) || other.priorityKtas == priorityKtas)&&(identical(other.isAiPredicted, isAiPredicted) || other.isAiPredicted == isAiPredicted)&&(identical(other.status, status) || other.status == status)&&(identical(other.patient, patient) || other.patient == patient));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,patientId,registrarId,doctorId,admissionDate,arrivalMode,injury,mentalStatus,pain,painLevel,hr,sbp,dbp,rr,bt,chiefComplaint,priorityKtas,isAiPredicted,status]);
+int get hashCode => Object.hashAll([runtimeType,id,patientId,registrarId,doctorId,admissionDate,arrivalMode,injury,mentalStatus,pain,painLevel,hr,sbp,dbp,rr,bt,chiefComplaint,priorityKtas,isAiPredicted,status,patient]);
 
 @override
 String toString() {
-  return 'AdmissionEntity(id: $id, patientId: $patientId, registrarId: $registrarId, doctorId: $doctorId, admissionDate: $admissionDate, arrivalMode: $arrivalMode, injury: $injury, mentalStatus: $mentalStatus, pain: $pain, painLevel: $painLevel, hr: $hr, sbp: $sbp, dbp: $dbp, rr: $rr, bt: $bt, chiefComplaint: $chiefComplaint, priorityKtas: $priorityKtas, isAiPredicted: $isAiPredicted, status: $status)';
+  return 'AdmissionEntity(id: $id, patientId: $patientId, registrarId: $registrarId, doctorId: $doctorId, admissionDate: $admissionDate, arrivalMode: $arrivalMode, injury: $injury, mentalStatus: $mentalStatus, pain: $pain, painLevel: $painLevel, hr: $hr, sbp: $sbp, dbp: $dbp, rr: $rr, bt: $bt, chiefComplaint: $chiefComplaint, priorityKtas: $priorityKtas, isAiPredicted: $isAiPredicted, status: $status, patient: $patient)';
 }
 
 
@@ -48,11 +48,11 @@ abstract mixin class $AdmissionEntityCopyWith<$Res>  {
   factory $AdmissionEntityCopyWith(AdmissionEntity value, $Res Function(AdmissionEntity) _then) = _$AdmissionEntityCopyWithImpl;
 @useResult
 $Res call({
- int id,@JsonKey(name: 'id_pacjenta') int patientId,@JsonKey(name: 'id_osoby_przyjmujacej') int registrarId,@JsonKey(name: 'id_lekarza_prowadzacego') int? doctorId,@JsonKey(name: 'data_przyjecia') DateTime admissionDate,@JsonKey(name: 'forma_przybycia') ArrivalMode arrivalMode, bool injury,@JsonKey(name: 'mental_status') MentalStatus mentalStatus, bool pain,@JsonKey(name: 'pain_lvl') int painLevel, int hr, int sbp, int dbp, int rr, double bt,@JsonKey(name: 'chief_complaint') String chiefComplaint,@JsonKey(name: 'priority_ktas') int priorityKtas,@JsonKey(name: 'is_ai_predicted') bool isAiPredicted,@JsonKey(name: 'status_przyjecia') AdmissionStatus status
+ int id,@JsonKey(name: 'id_pacjenta') int patientId,@JsonKey(name: 'id_osoby_przyjmujacej') int registrarId,@JsonKey(name: 'id_lekarza_prowadzacego') int? doctorId,@JsonKey(name: 'data_przyjecia') DateTime admissionDate,@JsonKey(name: 'forma_przybycia') ArrivalMode arrivalMode, bool injury,@JsonKey(name: 'mental_status') MentalStatus mentalStatus, bool pain,@JsonKey(name: 'pain_lvl') int painLevel, int hr, int sbp, int dbp, int rr, double bt,@JsonKey(name: 'chief_complaint') String chiefComplaint,@JsonKey(name: 'priority_ktas') int priorityKtas,@JsonKey(name: 'is_ai_predicted') bool isAiPredicted,@JsonKey(name: 'status_przyjecia') AdmissionStatus status, PatientEntity? patient
 });
 
 
-
+$PatientEntityCopyWith<$Res>? get patient;
 
 }
 /// @nodoc
@@ -65,7 +65,7 @@ class _$AdmissionEntityCopyWithImpl<$Res>
 
 /// Create a copy of AdmissionEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? patientId = null,Object? registrarId = null,Object? doctorId = freezed,Object? admissionDate = null,Object? arrivalMode = null,Object? injury = null,Object? mentalStatus = null,Object? pain = null,Object? painLevel = null,Object? hr = null,Object? sbp = null,Object? dbp = null,Object? rr = null,Object? bt = null,Object? chiefComplaint = null,Object? priorityKtas = null,Object? isAiPredicted = null,Object? status = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? patientId = null,Object? registrarId = null,Object? doctorId = freezed,Object? admissionDate = null,Object? arrivalMode = null,Object? injury = null,Object? mentalStatus = null,Object? pain = null,Object? painLevel = null,Object? hr = null,Object? sbp = null,Object? dbp = null,Object? rr = null,Object? bt = null,Object? chiefComplaint = null,Object? priorityKtas = null,Object? isAiPredicted = null,Object? status = null,Object? patient = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,patientId: null == patientId ? _self.patientId : patientId // ignore: cast_nullable_to_non_nullable
@@ -86,10 +86,23 @@ as double,chiefComplaint: null == chiefComplaint ? _self.chiefComplaint : chiefC
 as String,priorityKtas: null == priorityKtas ? _self.priorityKtas : priorityKtas // ignore: cast_nullable_to_non_nullable
 as int,isAiPredicted: null == isAiPredicted ? _self.isAiPredicted : isAiPredicted // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as AdmissionStatus,
+as AdmissionStatus,patient: freezed == patient ? _self.patient : patient // ignore: cast_nullable_to_non_nullable
+as PatientEntity?,
   ));
 }
+/// Create a copy of AdmissionEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PatientEntityCopyWith<$Res>? get patient {
+    if (_self.patient == null) {
+    return null;
+  }
 
+  return $PatientEntityCopyWith<$Res>(_self.patient!, (value) {
+    return _then(_self.copyWith(patient: value));
+  });
+}
 }
 
 
@@ -171,10 +184,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id, @JsonKey(name: 'id_pacjenta')  int patientId, @JsonKey(name: 'id_osoby_przyjmujacej')  int registrarId, @JsonKey(name: 'id_lekarza_prowadzacego')  int? doctorId, @JsonKey(name: 'data_przyjecia')  DateTime admissionDate, @JsonKey(name: 'forma_przybycia')  ArrivalMode arrivalMode,  bool injury, @JsonKey(name: 'mental_status')  MentalStatus mentalStatus,  bool pain, @JsonKey(name: 'pain_lvl')  int painLevel,  int hr,  int sbp,  int dbp,  int rr,  double bt, @JsonKey(name: 'chief_complaint')  String chiefComplaint, @JsonKey(name: 'priority_ktas')  int priorityKtas, @JsonKey(name: 'is_ai_predicted')  bool isAiPredicted, @JsonKey(name: 'status_przyjecia')  AdmissionStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id, @JsonKey(name: 'id_pacjenta')  int patientId, @JsonKey(name: 'id_osoby_przyjmujacej')  int registrarId, @JsonKey(name: 'id_lekarza_prowadzacego')  int? doctorId, @JsonKey(name: 'data_przyjecia')  DateTime admissionDate, @JsonKey(name: 'forma_przybycia')  ArrivalMode arrivalMode,  bool injury, @JsonKey(name: 'mental_status')  MentalStatus mentalStatus,  bool pain, @JsonKey(name: 'pain_lvl')  int painLevel,  int hr,  int sbp,  int dbp,  int rr,  double bt, @JsonKey(name: 'chief_complaint')  String chiefComplaint, @JsonKey(name: 'priority_ktas')  int priorityKtas, @JsonKey(name: 'is_ai_predicted')  bool isAiPredicted, @JsonKey(name: 'status_przyjecia')  AdmissionStatus status,  PatientEntity? patient)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdmissionEntity() when $default != null:
-return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.admissionDate,_that.arrivalMode,_that.injury,_that.mentalStatus,_that.pain,_that.painLevel,_that.hr,_that.sbp,_that.dbp,_that.rr,_that.bt,_that.chiefComplaint,_that.priorityKtas,_that.isAiPredicted,_that.status);case _:
+return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.admissionDate,_that.arrivalMode,_that.injury,_that.mentalStatus,_that.pain,_that.painLevel,_that.hr,_that.sbp,_that.dbp,_that.rr,_that.bt,_that.chiefComplaint,_that.priorityKtas,_that.isAiPredicted,_that.status,_that.patient);case _:
   return orElse();
 
 }
@@ -192,10 +205,10 @@ return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id, @JsonKey(name: 'id_pacjenta')  int patientId, @JsonKey(name: 'id_osoby_przyjmujacej')  int registrarId, @JsonKey(name: 'id_lekarza_prowadzacego')  int? doctorId, @JsonKey(name: 'data_przyjecia')  DateTime admissionDate, @JsonKey(name: 'forma_przybycia')  ArrivalMode arrivalMode,  bool injury, @JsonKey(name: 'mental_status')  MentalStatus mentalStatus,  bool pain, @JsonKey(name: 'pain_lvl')  int painLevel,  int hr,  int sbp,  int dbp,  int rr,  double bt, @JsonKey(name: 'chief_complaint')  String chiefComplaint, @JsonKey(name: 'priority_ktas')  int priorityKtas, @JsonKey(name: 'is_ai_predicted')  bool isAiPredicted, @JsonKey(name: 'status_przyjecia')  AdmissionStatus status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id, @JsonKey(name: 'id_pacjenta')  int patientId, @JsonKey(name: 'id_osoby_przyjmujacej')  int registrarId, @JsonKey(name: 'id_lekarza_prowadzacego')  int? doctorId, @JsonKey(name: 'data_przyjecia')  DateTime admissionDate, @JsonKey(name: 'forma_przybycia')  ArrivalMode arrivalMode,  bool injury, @JsonKey(name: 'mental_status')  MentalStatus mentalStatus,  bool pain, @JsonKey(name: 'pain_lvl')  int painLevel,  int hr,  int sbp,  int dbp,  int rr,  double bt, @JsonKey(name: 'chief_complaint')  String chiefComplaint, @JsonKey(name: 'priority_ktas')  int priorityKtas, @JsonKey(name: 'is_ai_predicted')  bool isAiPredicted, @JsonKey(name: 'status_przyjecia')  AdmissionStatus status,  PatientEntity? patient)  $default,) {final _that = this;
 switch (_that) {
 case _AdmissionEntity():
-return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.admissionDate,_that.arrivalMode,_that.injury,_that.mentalStatus,_that.pain,_that.painLevel,_that.hr,_that.sbp,_that.dbp,_that.rr,_that.bt,_that.chiefComplaint,_that.priorityKtas,_that.isAiPredicted,_that.status);case _:
+return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.admissionDate,_that.arrivalMode,_that.injury,_that.mentalStatus,_that.pain,_that.painLevel,_that.hr,_that.sbp,_that.dbp,_that.rr,_that.bt,_that.chiefComplaint,_that.priorityKtas,_that.isAiPredicted,_that.status,_that.patient);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +225,10 @@ return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id, @JsonKey(name: 'id_pacjenta')  int patientId, @JsonKey(name: 'id_osoby_przyjmujacej')  int registrarId, @JsonKey(name: 'id_lekarza_prowadzacego')  int? doctorId, @JsonKey(name: 'data_przyjecia')  DateTime admissionDate, @JsonKey(name: 'forma_przybycia')  ArrivalMode arrivalMode,  bool injury, @JsonKey(name: 'mental_status')  MentalStatus mentalStatus,  bool pain, @JsonKey(name: 'pain_lvl')  int painLevel,  int hr,  int sbp,  int dbp,  int rr,  double bt, @JsonKey(name: 'chief_complaint')  String chiefComplaint, @JsonKey(name: 'priority_ktas')  int priorityKtas, @JsonKey(name: 'is_ai_predicted')  bool isAiPredicted, @JsonKey(name: 'status_przyjecia')  AdmissionStatus status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id, @JsonKey(name: 'id_pacjenta')  int patientId, @JsonKey(name: 'id_osoby_przyjmujacej')  int registrarId, @JsonKey(name: 'id_lekarza_prowadzacego')  int? doctorId, @JsonKey(name: 'data_przyjecia')  DateTime admissionDate, @JsonKey(name: 'forma_przybycia')  ArrivalMode arrivalMode,  bool injury, @JsonKey(name: 'mental_status')  MentalStatus mentalStatus,  bool pain, @JsonKey(name: 'pain_lvl')  int painLevel,  int hr,  int sbp,  int dbp,  int rr,  double bt, @JsonKey(name: 'chief_complaint')  String chiefComplaint, @JsonKey(name: 'priority_ktas')  int priorityKtas, @JsonKey(name: 'is_ai_predicted')  bool isAiPredicted, @JsonKey(name: 'status_przyjecia')  AdmissionStatus status,  PatientEntity? patient)?  $default,) {final _that = this;
 switch (_that) {
 case _AdmissionEntity() when $default != null:
-return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.admissionDate,_that.arrivalMode,_that.injury,_that.mentalStatus,_that.pain,_that.painLevel,_that.hr,_that.sbp,_that.dbp,_that.rr,_that.bt,_that.chiefComplaint,_that.priorityKtas,_that.isAiPredicted,_that.status);case _:
+return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.admissionDate,_that.arrivalMode,_that.injury,_that.mentalStatus,_that.pain,_that.painLevel,_that.hr,_that.sbp,_that.dbp,_that.rr,_that.bt,_that.chiefComplaint,_that.priorityKtas,_that.isAiPredicted,_that.status,_that.patient);case _:
   return null;
 
 }
@@ -227,7 +240,7 @@ return $default(_that.id,_that.patientId,_that.registrarId,_that.doctorId,_that.
 @JsonSerializable()
 
 class _AdmissionEntity implements AdmissionEntity {
-  const _AdmissionEntity({required this.id, @JsonKey(name: 'id_pacjenta') required this.patientId, @JsonKey(name: 'id_osoby_przyjmujacej') required this.registrarId, @JsonKey(name: 'id_lekarza_prowadzacego') this.doctorId, @JsonKey(name: 'data_przyjecia') required this.admissionDate, @JsonKey(name: 'forma_przybycia') required this.arrivalMode, required this.injury, @JsonKey(name: 'mental_status') required this.mentalStatus, required this.pain, @JsonKey(name: 'pain_lvl') required this.painLevel, required this.hr, required this.sbp, required this.dbp, required this.rr, required this.bt, @JsonKey(name: 'chief_complaint') required this.chiefComplaint, @JsonKey(name: 'priority_ktas') required this.priorityKtas, @JsonKey(name: 'is_ai_predicted') required this.isAiPredicted, @JsonKey(name: 'status_przyjecia') required this.status});
+  const _AdmissionEntity({required this.id, @JsonKey(name: 'id_pacjenta') required this.patientId, @JsonKey(name: 'id_osoby_przyjmujacej') required this.registrarId, @JsonKey(name: 'id_lekarza_prowadzacego') this.doctorId, @JsonKey(name: 'data_przyjecia') required this.admissionDate, @JsonKey(name: 'forma_przybycia') required this.arrivalMode, required this.injury, @JsonKey(name: 'mental_status') required this.mentalStatus, required this.pain, @JsonKey(name: 'pain_lvl') required this.painLevel, required this.hr, required this.sbp, required this.dbp, required this.rr, required this.bt, @JsonKey(name: 'chief_complaint') required this.chiefComplaint, @JsonKey(name: 'priority_ktas') required this.priorityKtas, @JsonKey(name: 'is_ai_predicted') required this.isAiPredicted, @JsonKey(name: 'status_przyjecia') required this.status, this.patient});
   factory _AdmissionEntity.fromJson(Map<String, dynamic> json) => _$AdmissionEntityFromJson(json);
 
 @override final  int id;
@@ -249,6 +262,7 @@ class _AdmissionEntity implements AdmissionEntity {
 @override@JsonKey(name: 'priority_ktas') final  int priorityKtas;
 @override@JsonKey(name: 'is_ai_predicted') final  bool isAiPredicted;
 @override@JsonKey(name: 'status_przyjecia') final  AdmissionStatus status;
+@override final  PatientEntity? patient;
 
 /// Create a copy of AdmissionEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -263,16 +277,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdmissionEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.registrarId, registrarId) || other.registrarId == registrarId)&&(identical(other.doctorId, doctorId) || other.doctorId == doctorId)&&(identical(other.admissionDate, admissionDate) || other.admissionDate == admissionDate)&&(identical(other.arrivalMode, arrivalMode) || other.arrivalMode == arrivalMode)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.mentalStatus, mentalStatus) || other.mentalStatus == mentalStatus)&&(identical(other.pain, pain) || other.pain == pain)&&(identical(other.painLevel, painLevel) || other.painLevel == painLevel)&&(identical(other.hr, hr) || other.hr == hr)&&(identical(other.sbp, sbp) || other.sbp == sbp)&&(identical(other.dbp, dbp) || other.dbp == dbp)&&(identical(other.rr, rr) || other.rr == rr)&&(identical(other.bt, bt) || other.bt == bt)&&(identical(other.chiefComplaint, chiefComplaint) || other.chiefComplaint == chiefComplaint)&&(identical(other.priorityKtas, priorityKtas) || other.priorityKtas == priorityKtas)&&(identical(other.isAiPredicted, isAiPredicted) || other.isAiPredicted == isAiPredicted)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdmissionEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.registrarId, registrarId) || other.registrarId == registrarId)&&(identical(other.doctorId, doctorId) || other.doctorId == doctorId)&&(identical(other.admissionDate, admissionDate) || other.admissionDate == admissionDate)&&(identical(other.arrivalMode, arrivalMode) || other.arrivalMode == arrivalMode)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.mentalStatus, mentalStatus) || other.mentalStatus == mentalStatus)&&(identical(other.pain, pain) || other.pain == pain)&&(identical(other.painLevel, painLevel) || other.painLevel == painLevel)&&(identical(other.hr, hr) || other.hr == hr)&&(identical(other.sbp, sbp) || other.sbp == sbp)&&(identical(other.dbp, dbp) || other.dbp == dbp)&&(identical(other.rr, rr) || other.rr == rr)&&(identical(other.bt, bt) || other.bt == bt)&&(identical(other.chiefComplaint, chiefComplaint) || other.chiefComplaint == chiefComplaint)&&(identical(other.priorityKtas, priorityKtas) || other.priorityKtas == priorityKtas)&&(identical(other.isAiPredicted, isAiPredicted) || other.isAiPredicted == isAiPredicted)&&(identical(other.status, status) || other.status == status)&&(identical(other.patient, patient) || other.patient == patient));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,patientId,registrarId,doctorId,admissionDate,arrivalMode,injury,mentalStatus,pain,painLevel,hr,sbp,dbp,rr,bt,chiefComplaint,priorityKtas,isAiPredicted,status]);
+int get hashCode => Object.hashAll([runtimeType,id,patientId,registrarId,doctorId,admissionDate,arrivalMode,injury,mentalStatus,pain,painLevel,hr,sbp,dbp,rr,bt,chiefComplaint,priorityKtas,isAiPredicted,status,patient]);
 
 @override
 String toString() {
-  return 'AdmissionEntity(id: $id, patientId: $patientId, registrarId: $registrarId, doctorId: $doctorId, admissionDate: $admissionDate, arrivalMode: $arrivalMode, injury: $injury, mentalStatus: $mentalStatus, pain: $pain, painLevel: $painLevel, hr: $hr, sbp: $sbp, dbp: $dbp, rr: $rr, bt: $bt, chiefComplaint: $chiefComplaint, priorityKtas: $priorityKtas, isAiPredicted: $isAiPredicted, status: $status)';
+  return 'AdmissionEntity(id: $id, patientId: $patientId, registrarId: $registrarId, doctorId: $doctorId, admissionDate: $admissionDate, arrivalMode: $arrivalMode, injury: $injury, mentalStatus: $mentalStatus, pain: $pain, painLevel: $painLevel, hr: $hr, sbp: $sbp, dbp: $dbp, rr: $rr, bt: $bt, chiefComplaint: $chiefComplaint, priorityKtas: $priorityKtas, isAiPredicted: $isAiPredicted, status: $status, patient: $patient)';
 }
 
 
@@ -283,11 +297,11 @@ abstract mixin class _$AdmissionEntityCopyWith<$Res> implements $AdmissionEntity
   factory _$AdmissionEntityCopyWith(_AdmissionEntity value, $Res Function(_AdmissionEntity) _then) = __$AdmissionEntityCopyWithImpl;
 @override @useResult
 $Res call({
- int id,@JsonKey(name: 'id_pacjenta') int patientId,@JsonKey(name: 'id_osoby_przyjmujacej') int registrarId,@JsonKey(name: 'id_lekarza_prowadzacego') int? doctorId,@JsonKey(name: 'data_przyjecia') DateTime admissionDate,@JsonKey(name: 'forma_przybycia') ArrivalMode arrivalMode, bool injury,@JsonKey(name: 'mental_status') MentalStatus mentalStatus, bool pain,@JsonKey(name: 'pain_lvl') int painLevel, int hr, int sbp, int dbp, int rr, double bt,@JsonKey(name: 'chief_complaint') String chiefComplaint,@JsonKey(name: 'priority_ktas') int priorityKtas,@JsonKey(name: 'is_ai_predicted') bool isAiPredicted,@JsonKey(name: 'status_przyjecia') AdmissionStatus status
+ int id,@JsonKey(name: 'id_pacjenta') int patientId,@JsonKey(name: 'id_osoby_przyjmujacej') int registrarId,@JsonKey(name: 'id_lekarza_prowadzacego') int? doctorId,@JsonKey(name: 'data_przyjecia') DateTime admissionDate,@JsonKey(name: 'forma_przybycia') ArrivalMode arrivalMode, bool injury,@JsonKey(name: 'mental_status') MentalStatus mentalStatus, bool pain,@JsonKey(name: 'pain_lvl') int painLevel, int hr, int sbp, int dbp, int rr, double bt,@JsonKey(name: 'chief_complaint') String chiefComplaint,@JsonKey(name: 'priority_ktas') int priorityKtas,@JsonKey(name: 'is_ai_predicted') bool isAiPredicted,@JsonKey(name: 'status_przyjecia') AdmissionStatus status, PatientEntity? patient
 });
 
 
-
+@override $PatientEntityCopyWith<$Res>? get patient;
 
 }
 /// @nodoc
@@ -300,7 +314,7 @@ class __$AdmissionEntityCopyWithImpl<$Res>
 
 /// Create a copy of AdmissionEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? patientId = null,Object? registrarId = null,Object? doctorId = freezed,Object? admissionDate = null,Object? arrivalMode = null,Object? injury = null,Object? mentalStatus = null,Object? pain = null,Object? painLevel = null,Object? hr = null,Object? sbp = null,Object? dbp = null,Object? rr = null,Object? bt = null,Object? chiefComplaint = null,Object? priorityKtas = null,Object? isAiPredicted = null,Object? status = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? patientId = null,Object? registrarId = null,Object? doctorId = freezed,Object? admissionDate = null,Object? arrivalMode = null,Object? injury = null,Object? mentalStatus = null,Object? pain = null,Object? painLevel = null,Object? hr = null,Object? sbp = null,Object? dbp = null,Object? rr = null,Object? bt = null,Object? chiefComplaint = null,Object? priorityKtas = null,Object? isAiPredicted = null,Object? status = null,Object? patient = freezed,}) {
   return _then(_AdmissionEntity(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,patientId: null == patientId ? _self.patientId : patientId // ignore: cast_nullable_to_non_nullable
@@ -321,11 +335,24 @@ as double,chiefComplaint: null == chiefComplaint ? _self.chiefComplaint : chiefC
 as String,priorityKtas: null == priorityKtas ? _self.priorityKtas : priorityKtas // ignore: cast_nullable_to_non_nullable
 as int,isAiPredicted: null == isAiPredicted ? _self.isAiPredicted : isAiPredicted // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as AdmissionStatus,
+as AdmissionStatus,patient: freezed == patient ? _self.patient : patient // ignore: cast_nullable_to_non_nullable
+as PatientEntity?,
   ));
 }
 
+/// Create a copy of AdmissionEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PatientEntityCopyWith<$Res>? get patient {
+    if (_self.patient == null) {
+    return null;
+  }
 
+  return $PatientEntityCopyWith<$Res>(_self.patient!, (value) {
+    return _then(_self.copyWith(patient: value));
+  });
+}
 }
 
 // dart format on

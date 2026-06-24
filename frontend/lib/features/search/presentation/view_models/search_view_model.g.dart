@@ -151,7 +151,7 @@ final class FetchedPatientsProvider
   }
 }
 
-String _$fetchedPatientsHash() => r'daefda421d6490bd8ff686aac9d2cb66b261ccfb';
+String _$fetchedPatientsHash() => r'a07329f5d0d3cdeb945725a32abec821f20a89ee';
 
 @ProviderFor(PatientsSearch)
 final patientsSearchProvider = PatientsSearchProvider._();
@@ -237,7 +237,7 @@ final class FetchedStaffProvider
   }
 }
 
-String _$fetchedStaffHash() => r'78215fe2e36f2df8a72fc7dd88ecc6cdb1076538';
+String _$fetchedStaffHash() => r'c87546fb9af17c04c421255ff5ee7b65a9a53cf5';
 
 @ProviderFor(StaffSearch)
 final staffSearchProvider = StaffSearchProvider._();

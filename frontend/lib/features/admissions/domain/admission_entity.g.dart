@@ -27,6 +27,9 @@ _AdmissionEntity _$AdmissionEntityFromJson(Map<String, dynamic> json) =>
       priorityKtas: (json['priority_ktas'] as num).toInt(),
       isAiPredicted: json['is_ai_predicted'] as bool,
       status: $enumDecode(_$AdmissionStatusEnumMap, json['status_przyjecia']),
+      patient: json['patient'] == null
+          ? null
+          : PatientEntity.fromJson(json['patient'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AdmissionEntityToJson(_AdmissionEntity instance) =>
@@ -50,14 +53,15 @@ Map<String, dynamic> _$AdmissionEntityToJson(_AdmissionEntity instance) =>
       'priority_ktas': instance.priorityKtas,
       'is_ai_predicted': instance.isAiPredicted,
       'status_przyjecia': _$AdmissionStatusEnumMap[instance.status]!,
+      'patient': instance.patient,
     };
 
 const _$ArrivalModeEnumMap = {
-  ArrivalMode.pieszo: 'Pieszo',
-  ArrivalMode.karetkaPubliczna: 'Karetka publiczna',
-  ArrivalMode.pojazdPrywatny: 'Pojazd prywatny',
-  ArrivalMode.karetkaPrywatna: 'Karetka prywatna',
-  ArrivalMode.inne: 'Inne',
+  ArrivalMode.onFoot: 'Pieszo',
+  ArrivalMode.publicAmbulance: 'Karetka publiczna',
+  ArrivalMode.privateVehicle: 'Pojazd prywatny',
+  ArrivalMode.privateAmbulance: 'Karetka prywatna',
+  ArrivalMode.other: 'Inne',
 };
 
 const _$MentalStatusEnumMap = {

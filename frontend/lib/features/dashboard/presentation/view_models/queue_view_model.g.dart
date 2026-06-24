@@ -20,7 +20,7 @@ final class QueueViewModelProvider
         argument: null,
         retry: null,
         name: r'queueViewModelProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -33,7 +33,7 @@ final class QueueViewModelProvider
   QueueViewModel create() => QueueViewModel();
 }
 
-String _$queueViewModelHash() => r'b290f6b4c94195cf18b2f67000c7d0e387f6bcf4';
+String _$queueViewModelHash() => r'c22923f0e1578ddcd476692cff90809108c40091';
 
 abstract class _$QueueViewModel extends $StreamNotifier<List<AdmissionEntity>> {
   Stream<List<AdmissionEntity>> build();
@@ -57,44 +57,3 @@ abstract class _$QueueViewModel extends $StreamNotifier<List<AdmissionEntity>> {
     return element.handleCreate(ref, build);
   }
 }
-
-@ProviderFor(visibleQueue)
-final visibleQueueProvider = VisibleQueueProvider._();
-
-final class VisibleQueueProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<List<AdmissionEntity>>,
-          List<AdmissionEntity>,
-          Stream<List<AdmissionEntity>>
-        >
-    with
-        $FutureModifier<List<AdmissionEntity>>,
-        $StreamProvider<List<AdmissionEntity>> {
-  VisibleQueueProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'visibleQueueProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$visibleQueueHash();
-
-  @$internal
-  @override
-  $StreamProviderElement<List<AdmissionEntity>> $createElement(
-    $ProviderPointer pointer,
-  ) => $StreamProviderElement(pointer);
-
-  @override
-  Stream<List<AdmissionEntity>> create(Ref ref) {
-    return visibleQueue(ref);
-  }
-}
-
-String _$visibleQueueHash() => r'b2caa80a17adadbd972934e3b55ff125b91486dd';

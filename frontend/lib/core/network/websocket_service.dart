@@ -28,20 +28,27 @@ class WebSocketService {
   int _reconnectAttempts = 0;
   bool _isDisposed = false;
 
-  static const int _maxReconnectAttempts = 10;
+  static const int _maxReconnectAttempts = 3;
   static const Duration _initialReconnectDelay = Duration(seconds: 2);
 
   List<AdmissionEntity>? _lastAdmissions;
+  Object? _lastError;
+  StackTrace? _lastStackTrace;
   final WebSocketChannel Function(Uri) _channelFactory;
 
-  WebSocketService(this._storage, {WebSocketChannel Function(Uri)? channelFactory}) 
-    : _channelFactory = channelFactory ?? ((uri) => WebSocketChannel.connect(uri)) {
+  WebSocketService(
+    this._storage, {
+    WebSocketChannel Function(Uri)? channelFactory,
+  }) : _channelFactory =
+           channelFactory ?? ((uri) => WebSocketChannel.connect(uri)) {
     _admissionsController = StreamController<List<AdmissionEntity>>.broadcast();
   }
 
   Stream<List<AdmissionEntity>> get queueStream async* {
     if (_lastAdmissions != null) {
       yield _lastAdmissions!;
+    } else if (_lastError != null) {
+      yield* Stream.error(_lastError!, _lastStackTrace);
     }
     if (_admissionsController != null) {
       yield* _admissionsController!.stream;
@@ -54,44 +61,61 @@ class WebSocketService {
     if (_isDisposed) return;
     if (_channel != null) return;
 
-    final token = await _storage.getToken();
-
-    final tokenQuery = token != null ? '?token=$token' : '';
-
-    final uri = Uri.parse(EnvConstants.apiUrl);
-    final wsScheme = uri.scheme == 'https' ? 'wss' : 'ws';
-    final path = uri.path.endsWith('/') ? uri.path : '${uri.path}/';
-    final wsUrlStr =
-        '$wsScheme://${uri.host}:${uri.port}${path}ws/admissions/queue$tokenQuery';
-
     try {
+      final token = await _storage.getToken();
+
+      final tokenQuery = token != null ? '?token=$token' : '';
+
+      final uri = Uri.parse(EnvConstants.apiUrl);
+      final wsScheme = uri.scheme == 'https' ? 'wss' : 'ws';
+      final path = uri.path.endsWith('/') ? uri.path : '${uri.path}/';
+      final wsUrlStr =
+          '$wsScheme://${uri.host}:${uri.port}${path}ws/admissions/queue$tokenQuery';
+
       _channel = _channelFactory(Uri.parse(wsUrlStr));
 
       _channel!.stream.listen(
         (message) {
           _reconnectAttempts = 0;
+          _lastError = null;
+          _lastStackTrace = null;
           try {
-            final List<dynamic> decoded = jsonDecode(message);
+            final decodedMessage = jsonDecode(message);
+            if (decodedMessage == null) {
+              _admissionsController?.add([]);
+              return;
+            }
+            final List<dynamic> decoded = decodedMessage;
             final admissions = decoded
                 .map((e) => AdmissionEntity.fromJson(e))
                 .toList();
             _lastAdmissions = admissions;
             _admissionsController?.add(admissions);
           } catch (e, st) {
-            _admissionsController?.addError('Błąd parsowania ws: $e', st);
+            _lastError = 'Błąd parsowania ws: $e';
+            _lastStackTrace = st;
+            _admissionsController?.addError(_lastError!, st);
           }
         },
         onDone: () {
+          _lastError = 'Połączenie z serwerem zostało przerwane.';
+          _lastStackTrace = StackTrace.current;
+          _admissionsController?.addError(_lastError!, _lastStackTrace!);
           _channel = null;
           _scheduleReconnect();
         },
         onError: (error, st) {
-          _admissionsController?.addError('Błąd połączenia ws: $error', st);
+          _lastError = 'Błąd połączenia ws: $error';
+          _lastStackTrace = st;
+          _admissionsController?.addError(_lastError!, st);
           _channel = null;
           _scheduleReconnect();
         },
       );
-    } catch (e) {
+    } catch (e, st) {
+      _lastError = 'Błąd połączenia ws: $e';
+      _lastStackTrace = st;
+      _admissionsController?.addError(_lastError!, st);
       _channel = null;
       _scheduleReconnect();
     }

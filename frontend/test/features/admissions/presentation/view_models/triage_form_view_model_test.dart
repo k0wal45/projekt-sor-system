@@ -2,6 +2,7 @@ import 'package:esor/core/providers/repository_providers.dart';
 import 'package:esor/features/admissions/domain/admission_entity.dart';
 import 'package:esor/features/admissions/domain/admission_repository.dart';
 import 'package:esor/features/admissions/presentation/view_models/triage_form_view_model.dart';
+import 'package:esor/features/patients/domain/patient_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -29,7 +30,7 @@ void main() {
   group('TriageFormViewModel', () {
     final testTriageDto = TriageFormDto(
       patientId: 1,
-      arrivalMode: ArrivalMode.pieszo,
+      arrivalMode: ArrivalMode.onFoot,
       injury: false,
       mentalStatus: MentalStatus.fullyConscious,
       pain: false,
@@ -47,7 +48,7 @@ void main() {
       patientId: 1,
       registrarId: 1,
       admissionDate: DateTime.now(),
-      arrivalMode: ArrivalMode.pieszo,
+      arrivalMode: ArrivalMode.onFoot,
       injury: false,
       mentalStatus: MentalStatus.fullyConscious,
       pain: false,
@@ -61,6 +62,22 @@ void main() {
       priorityKtas: 3,
       isAiPredicted: true,
       status: AdmissionStatus.inQueue,
+      patient: PatientEntity(
+        id: 1,
+        firstName: '',
+        lastName: '',
+        pesel: '',
+        birthDate: DateTime.now(),
+        gender: Gender.m,
+        address: '',
+        phone: '',
+        email: '',
+        emergencyContactName: '',
+        emergencyContactPhone: '',
+        bloodGroup: null,
+        allergies: '',
+        chronicDiseases: '',
+      ),
     );
 
     test('initial state is AsyncData(null)', () {
@@ -69,33 +86,40 @@ void main() {
     });
 
     group('predictKtas', () {
-      test('updates state to AsyncLoading then AsyncData(null) and returns ktas on success', () async {
-        // Arrange
-        when(() => mockRepository.predictKtas(testTriageDto))
-            .thenAnswer((_) async => right(3));
+      test(
+        'updates state to AsyncLoading then AsyncData(null) and returns ktas on success',
+        () async {
+          // Arrange
+          when(
+            () => mockRepository.predictKtas(testTriageDto),
+          ).thenAnswer((_) async => right(3));
 
-        final states = <AsyncValue<void>>[];
-        container.listen(
-          triageFormViewModelProvider,
-          (previous, next) => states.add(next),
-          fireImmediately: false,
-        );
+          final states = <AsyncValue<void>>[];
+          container.listen(
+            triageFormViewModelProvider,
+            (previous, next) => states.add(next),
+            fireImmediately: false,
+          );
 
-        // Act
-        final result = await container.read(triageFormViewModelProvider.notifier).predictKtas(testTriageDto);
+          // Act
+          final result = await container
+              .read(triageFormViewModelProvider.notifier)
+              .predictKtas(testTriageDto);
 
-        // Assert
-        expect(result, 3);
-        expect(states.length, 2);
-        expect(states[0], isA<AsyncLoading<void>>());
-        expect(states[1], isA<AsyncData<void>>());
-        verify(() => mockRepository.predictKtas(testTriageDto)).called(1);
-      });
+          // Assert
+          expect(result, 3);
+          expect(states.length, 2);
+          expect(states[0], isA<AsyncLoading<void>>());
+          expect(states[1], isA<AsyncData<void>>());
+          verify(() => mockRepository.predictKtas(testTriageDto)).called(1);
+        },
+      );
 
       test('updates state to AsyncError on failure and returns null', () async {
         // Arrange
-        when(() => mockRepository.predictKtas(testTriageDto))
-            .thenAnswer((_) async => left('Błąd API'));
+        when(
+          () => mockRepository.predictKtas(testTriageDto),
+        ).thenAnswer((_) async => left('Błąd API'));
 
         final states = <AsyncValue<void>>[];
         container.listen(
@@ -105,7 +129,9 @@ void main() {
         );
 
         // Act
-        final result = await container.read(triageFormViewModelProvider.notifier).predictKtas(testTriageDto);
+        final result = await container
+            .read(triageFormViewModelProvider.notifier)
+            .predictKtas(testTriageDto);
 
         // Assert
         expect(result, isNull);
@@ -118,52 +144,68 @@ void main() {
     });
 
     group('submitTriage', () {
-      test('updates state to AsyncData(null) and returns true on success', () async {
-        // Arrange
-        when(() => mockRepository.createAdmission(testTriageDto, 3, true))
-            .thenAnswer((_) async => right(testAdmission));
+      test(
+        'updates state to AsyncData(null) and returns true on success',
+        () async {
+          // Arrange
+          when(
+            () => mockRepository.createAdmission(testTriageDto, 3, true),
+          ).thenAnswer((_) async => right(testAdmission));
 
-        final states = <AsyncValue<void>>[];
-        container.listen(
-          triageFormViewModelProvider,
-          (previous, next) => states.add(next),
-          fireImmediately: false,
-        );
+          final states = <AsyncValue<void>>[];
+          container.listen(
+            triageFormViewModelProvider,
+            (previous, next) => states.add(next),
+            fireImmediately: false,
+          );
 
-        // Act
-        final result = await container.read(triageFormViewModelProvider.notifier).submitTriage(testTriageDto, 3, true);
+          // Act
+          final result = await container
+              .read(triageFormViewModelProvider.notifier)
+              .submitTriage(testTriageDto, 3, true);
 
-        // Assert
-        expect(result, isTrue);
-        expect(states.length, 2);
-        expect(states[0], isA<AsyncLoading<void>>());
-        expect(states[1], isA<AsyncData<void>>());
-        verify(() => mockRepository.createAdmission(testTriageDto, 3, true)).called(1);
-      });
+          // Assert
+          expect(result, isTrue);
+          expect(states.length, 2);
+          expect(states[0], isA<AsyncLoading<void>>());
+          expect(states[1], isA<AsyncData<void>>());
+          verify(
+            () => mockRepository.createAdmission(testTriageDto, 3, true),
+          ).called(1);
+        },
+      );
 
-      test('updates state to AsyncError and returns false on failure', () async {
-        // Arrange
-        when(() => mockRepository.createAdmission(testTriageDto, 3, true))
-            .thenAnswer((_) async => left('Błąd tworzenia'));
+      test(
+        'updates state to AsyncError and returns false on failure',
+        () async {
+          // Arrange
+          when(
+            () => mockRepository.createAdmission(testTriageDto, 3, true),
+          ).thenAnswer((_) async => left('Błąd tworzenia'));
 
-        final states = <AsyncValue<void>>[];
-        container.listen(
-          triageFormViewModelProvider,
-          (previous, next) => states.add(next),
-          fireImmediately: false,
-        );
+          final states = <AsyncValue<void>>[];
+          container.listen(
+            triageFormViewModelProvider,
+            (previous, next) => states.add(next),
+            fireImmediately: false,
+          );
 
-        // Act
-        final result = await container.read(triageFormViewModelProvider.notifier).submitTriage(testTriageDto, 3, true);
+          // Act
+          final result = await container
+              .read(triageFormViewModelProvider.notifier)
+              .submitTriage(testTriageDto, 3, true);
 
-        // Assert
-        expect(result, isFalse);
-        expect(states.length, 2);
-        expect(states[0], isA<AsyncLoading<void>>());
-        expect(states[1], isA<AsyncError<void>>());
-        expect(states[1].error, 'Błąd tworzenia');
-        verify(() => mockRepository.createAdmission(testTriageDto, 3, true)).called(1);
-      });
+          // Assert
+          expect(result, isFalse);
+          expect(states.length, 2);
+          expect(states[0], isA<AsyncLoading<void>>());
+          expect(states[1], isA<AsyncError<void>>());
+          expect(states[1].error, 'Błąd tworzenia');
+          verify(
+            () => mockRepository.createAdmission(testTriageDto, 3, true),
+          ).called(1);
+        },
+      );
     });
   });
 }

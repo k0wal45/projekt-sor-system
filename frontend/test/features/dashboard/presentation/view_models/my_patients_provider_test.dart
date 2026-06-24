@@ -4,6 +4,7 @@ import 'package:esor/features/admissions/domain/admission_repository.dart';
 import 'package:esor/features/auth/domain/auth_repository.dart';
 import 'package:esor/features/auth/presentation/view_models/auth_view_model.dart';
 import 'package:esor/features/dashboard/presentation/view_models/my_patients_provider.dart';
+import 'package:esor/features/patients/domain/patient_entity.dart';
 import 'package:esor/features/staff/domain/staff_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,7 +60,7 @@ void main() {
         registrarId: 1,
         doctorId: doctorId,
         admissionDate: DateTime.now(),
-        arrivalMode: ArrivalMode.karetkaPubliczna,
+        arrivalMode: ArrivalMode.publicAmbulance,
         injury: false,
         mentalStatus: MentalStatus.fullyConscious,
         pain: false,
@@ -73,6 +74,22 @@ void main() {
         priorityKtas: 3,
         isAiPredicted: false,
         status: status,
+        patient: PatientEntity(
+          id: patientId,
+          firstName: '',
+          lastName: '',
+          pesel: '',
+          birthDate: DateTime.now(),
+          gender: Gender.m,
+          address: '',
+          phone: '',
+          email: '',
+          emergencyContactName: '',
+          emergencyContactPhone: '',
+          bloodGroup: null,
+          allergies: '',
+          chronicDiseases: '',
+        ),
       );
     }
 

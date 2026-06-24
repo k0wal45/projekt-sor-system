@@ -34,6 +34,8 @@ extension StaffRoleDisplay on StaffRole {
 
 @freezed
 abstract class StaffEntity with _$StaffEntity {
+  const StaffEntity._();
+
   const factory StaffEntity({
     @JsonKey(name: 'id') required int id,
     @JsonKey(name: 'first_name') required String firstName,
@@ -45,4 +47,6 @@ abstract class StaffEntity with _$StaffEntity {
 
   factory StaffEntity.fromJson(Map<String, dynamic> json) =>
       _$StaffEntityFromJson(json);
+
+  String get initials => '${firstName[0]}${lastName[0]}';
 }

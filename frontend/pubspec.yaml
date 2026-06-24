@@ -44,6 +44,7 @@ dependencies:
   google_fonts: ^8.1.0
   flutter_secure_storage: ^10.3.1
   web_socket_channel: ^3.0.3
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - .env
+    - assets/esor-logo.svg
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
 

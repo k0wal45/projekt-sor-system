@@ -102,4 +102,4 @@ final class PatientSelectionSearchProvider
 }
 
 String _$patientSelectionSearchHash() =>
-    r'acc5b68cb5e74ce591e4988bd1005bd3eadf251e';
+    r'60007e1da2aefb7afa38ff418b6c025b62347378';

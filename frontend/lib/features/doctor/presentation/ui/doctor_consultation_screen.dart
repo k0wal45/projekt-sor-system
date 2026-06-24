@@ -38,8 +38,8 @@ class _DoctorConsultationScreenState
     if (type.isEmpty || desc.isEmpty) return;
 
     final success = await ref
-        .read(doctorViewModelProvider.notifier)
-        .orderDiagnostics(widget.admissionId, type, desc);
+        .read(orderDiagnosticsViewModelProvider.notifier)
+        .invoke(widget.admissionId, type, desc);
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -51,7 +51,6 @@ class _DoctorConsultationScreenState
       );
       _testTypeController.clear();
       _testDescController.clear();
-      // Invalidate the MyPatients provider so the Dashboard updates
       ref.invalidate(myPatientsProvider);
       context.pop();
     }
@@ -64,13 +63,8 @@ class _DoctorConsultationScreenState
     if (interview.isEmpty || icd10.isEmpty) return;
 
     final success = await ref
-        .read(doctorViewModelProvider.notifier)
-        .completeConsultation(
-          widget.admissionId,
-          interview,
-          icd10,
-          _selectedDecision,
-        );
+        .read(completeConsultationViewModelProvider.notifier)
+        .invoke(widget.admissionId, interview, icd10, _selectedDecision);
 
     if (success && mounted) {
       ScaffoldMessenger.of(
@@ -85,109 +79,86 @@ class _DoctorConsultationScreenState
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(doctorViewModelProvider).isLoading;
+    final isOrdering = ref.watch(orderDiagnosticsViewModelProvider).isLoading;
+    final isCompleting = ref
+        .watch(completeConsultationViewModelProvider)
+        .isLoading;
+    final isAnyLoading = isOrdering || isCompleting;
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Konsultacja - Zgłoszenie #${widget.admissionId}'),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Zlecenie Badań Diagnostycznych',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _testTypeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Typ badania (np. KREW, RTG)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _testDescController,
-                    decoration: const InputDecoration(
-                      labelText: 'Opis zlecenia',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: _orderTest,
-                    child: const Text('Zleć badanie (zawiesza wizytę)'),
-                  ),
-
-                  const SizedBox(height: 32),
-                  const Divider(),
-                  const SizedBox(height: 32),
-
-                  Text(
-                    'Zakończenie Wizyty',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _interviewController,
-                    decoration: const InputDecoration(
-                      labelText: 'Wywiad / Opis wizyty',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 4,
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _icd10Controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Kod ICD-10 (Rozpoznanie)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedDecision,
-                    decoration: const InputDecoration(
-                      labelText: 'Decyzja wyjściowa',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'WYPIS_DO_DOMU',
-                        child: Text('Wypis do domu'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'HOSPITALIZACJA',
-                        child: Text('Hospitalizacja'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'TRANSFER_NA_ODDZIAL',
-                        child: Text('Transfer na oddział'),
-                      ),
-                      DropdownMenuItem(value: 'ZGON', child: Text('Zgon')),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) setState(() => _selectedDecision = val);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _completeConsultation,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade100,
-                      foregroundColor: Colors.red.shade900,
-                    ),
-                    child: const Text('ZAKOŃCZ KONSULTACJĘ'),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Zakończenie Wizyty',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _interviewController,
+              decoration: const InputDecoration(
+                labelText: 'Wywiad / Opis wizyty',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 4,
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _icd10Controller,
+              decoration: const InputDecoration(
+                labelText: 'Kod ICD-10 (Rozpoznanie)',
+                border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedDecision,
+              decoration: const InputDecoration(
+                labelText: 'Decyzja wyjściowa',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: 'WYPIS_DO_DOMU',
+                  child: Text('Wypis do domu'),
+                ),
+                DropdownMenuItem(
+                  value: 'HOSPITALIZACJA',
+                  child: Text('Hospitalizacja'),
+                ),
+                DropdownMenuItem(
+                  value: 'TRANSFER_NA_ODDZIAL',
+                  child: Text('Transfer na oddział'),
+                ),
+                DropdownMenuItem(value: 'ZGON', child: Text('Zgon')),
+              ],
+              onChanged: (val) {
+                if (val != null) setState(() => _selectedDecision = val);
+              },
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: isAnyLoading ? null : _completeConsultation,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade100,
+                foregroundColor: Colors.red.shade900,
+              ),
+              child: isCompleting
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('ZAKOŃCZ KONSULTACJĘ'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -213,8 +213,8 @@ return $default(_that.id,_that.firstName,_that.lastName,_that.academicTitle,_tha
 /// @nodoc
 @JsonSerializable()
 
-class _StaffEntity implements StaffEntity {
-  const _StaffEntity({@JsonKey(name: 'id') required this.id, @JsonKey(name: 'first_name') required this.firstName, @JsonKey(name: 'last_name') required this.lastName, @JsonKey(name: 'academic_title') this.academicTitle = '', @JsonKey(name: 'role') required this.role, @JsonKey(name: 'login_email') this.email = ''});
+class _StaffEntity extends StaffEntity {
+  const _StaffEntity({@JsonKey(name: 'id') required this.id, @JsonKey(name: 'first_name') required this.firstName, @JsonKey(name: 'last_name') required this.lastName, @JsonKey(name: 'academic_title') this.academicTitle = '', @JsonKey(name: 'role') required this.role, @JsonKey(name: 'login_email') this.email = ''}): super._();
   factory _StaffEntity.fromJson(Map<String, dynamic> json) => _$StaffEntityFromJson(json);
 
 @override@JsonKey(name: 'id') final  int id;
