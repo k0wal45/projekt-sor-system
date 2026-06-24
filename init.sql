@@ -6,8 +6,6 @@ CREATE TYPE blood_group_enum AS ENUM ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', '0+'
 CREATE TYPE role_enum AS ENUM ('PIELEGNIARZ', 'RATOWNIK', 'LEKARZ', 'ADMIN');
 CREATE TYPE admission_status_enum AS ENUM ('W_POCZEKALNI', 'W_GABINECIE', 'OCZEKUJE_NA_WYNIKI', 'ZAKONCZONE');
 CREATE TYPE discharge_decision_enum AS ENUM ('DO_DOMU', 'NA_ODDZIAL', 'OIOM', 'ZGON');
-CREATE TYPE order_type_enum AS ENUM ('KREW', 'RTG', 'TK', 'USG', 'EKG', 'INNE');
-CREATE TYPE order_status_enum AS ENUM ('ZLECONE', 'W_TRAKCIE', 'WYNIK_GOTOWY');
 
 -- Nowe ENUM-y dla zaktualizowanego procesu Triage/Admissions:
 CREATE TYPE arrival_mode_enum AS ENUM ('Pieszo', 'Karetka publiczna', 'Pojazd prywatny', 'Karetka prywatna', 'Inne');
@@ -48,7 +46,7 @@ CREATE TABLE staff (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela 3: Przyjęcie na SOR (Admissions) - ZAKTUALIZOWANA
+-- Tabela 3: Przyjęcie na SOR (Admissions)
 CREATE TABLE admissions (
     id SERIAL PRIMARY KEY,
     id_pacjenta INTEGER NOT NULL REFERENCES patients(id) ON DELETE RESTRICT,
@@ -61,12 +59,12 @@ CREATE TABLE admissions (
     pain BOOLEAN NOT NULL DEFAULT FALSE,
     pain_lvl INTEGER NOT NULL CHECK (pain_lvl >= 0 AND pain_lvl <= 10), -- skala NRS 0-10
     
-    -- Parametry życiowe (Wartości numeryczne)
+    -- Parametry życiowe
     hr INTEGER NOT NULL,          -- Heart Rate (tętno)
     sbp INTEGER NOT NULL,         -- Systolic Blood Pressure (skurczowe)
     dbp INTEGER NOT NULL,         -- Diastolic Blood Pressure (rozkurczowe)
     rr INTEGER NOT NULL,          -- Respiratory Rate (częstość oddechów)
-    bt NUMERIC(3,1) NOT NULL,     -- Body Temperature (temperatura, np. 36.6)
+    bt NUMERIC(3,1) NOT NULL,     -- Body Temperature (temperatura)
     
     chief_complaint TEXT NOT NULL,
     priority_ktas INTEGER NOT NULL CHECK (priority_ktas >= 1 AND priority_ktas <= 5),
@@ -74,24 +72,26 @@ CREATE TABLE admissions (
     status_przyjecia admission_status_enum DEFAULT 'W_POCZEKALNI'
 );
 
--- Tabela 4: Konsultacja Lekarska (Consultations)
+-- Tabela 4: Konsultacja Lekarska (Consultations) - SZNCHRONIZOWANA Z GO
 CREATE TABLE consultations (
     id SERIAL PRIMARY KEY,
-    admission_id INTEGER UNIQUE NOT NULL REFERENCES admissions(id) ON DELETE CASCADE, -- Relacja 1-do-1
-    medical_history TEXT NOT NULL,
-    diagnosis TEXT NOT NULL,
-    discharge_decision discharge_decision_enum NOT NULL,
-    end_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id_przyjecia INTEGER UNIQUE NOT NULL REFERENCES admissions(id) ON DELETE CASCADE, -- Relacja 1-do-1
+    id_lekarza INTEGER NOT NULL REFERENCES staff(id) ON DELETE RESTRICT,
+    wywiad_lekarski TEXT NOT NULL,
+    rozpoznanie_icd10 TEXT NOT NULL,
+    decyzja_wyjsciowa VARCHAR(100) NOT NULL, -- odpowiada tekstowej mapie w Go
+    data_konsultacji TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela 5: Zlecenia Diagnostyczne (Diagnostic_Orders)
+-- Tabela 5: Zlecenia Diagnostyczne (Diagnostic_Orders) - SYNCHRONIZOWANA Z GO
 CREATE TABLE diagnostic_orders (
     id SERIAL PRIMARY KEY,
-    admission_id INTEGER NOT NULL REFERENCES admissions(id) ON DELETE CASCADE,
-    order_type order_type_enum NOT NULL,
-    order_notes TEXT,
-    order_status order_status_enum DEFAULT 'ZLECONE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id_przyjecia INTEGER NOT NULL REFERENCES admissions(id) ON DELETE CASCADE,
+    id_lekarza INTEGER NOT NULL REFERENCES staff(id) ON DELETE RESTRICT,
+    typ_badania VARCHAR(100) NOT NULL, -- tekstowy podział np. KREW, RTG w modelu Go
+    opis_zlecenia TEXT,
+    status_badania VARCHAR(100) DEFAULT 'ZLECONE', -- domyślny status
+    data_zlecenia TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================================================================
@@ -99,3 +99,5 @@ CREATE TABLE diagnostic_orders (
 -- =========================================================================
 CREATE INDEX idx_admissions_status_przyjecia ON admissions(status_przyjecia);
 CREATE INDEX idx_admissions_priority_ktas ON admissions(priority_ktas);
+CREATE INDEX idx_consultations_id_przyjecia ON consultations(id_przyjecia);
+CREATE INDEX idx_diagnostic_orders_id_przyjecia ON diagnostic_orders(id_przyjecia);

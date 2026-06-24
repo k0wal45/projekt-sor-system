@@ -1,135 +1,135 @@
-Oto zaktualizowana i rozbudowana treść pliku `README.md`, która uwzględnia nowo wdrożoną architekturę środowiskową (automatyczne przełączanie bazy za pomocą kodu w Go) oraz porządkuje sekcję zmiennych środowiskowych `.env`.
+# System Wspomagania Klasyfikacji Pacjentów (E-SOR)
 
-Dokument został zaprojektowany zgodnie z wymaganiami akademickimi – jest szczegółowy, profesjonalnie sformatowany i technicznie precyzyjny.
+Inteligentny system wspomagania decyzji medycznych przeznaczony do automatyzacji segregacji pacjentów (Triage) na Szpitalnych Oddziałach Ratunkowych zgodnie ze standardem KTAS. Projekt łączy w sobie architekturę mikroserwisową, przetwarzanie w czasie rzeczywistym oraz wnioskowanie z użyciem sztucznej inteligencji.
 
----
+## Architektura Systemu
 
-# System Wspomagania Klasyfikacji Pacjentów (SOR Triage)
+- **Frontend (Flutter):** Reaktywna aplikacja kliencka implementująca wzorzec MVVM, połączona z backendem za pomocą zapytań REST API (Dio) oraz asynchronicznych strumieni WebSocket.
 
-Projekt łączony na 4 przedmioty akademickie.
+- **Backend API (Go / Gin):** Wysokowydajny serwer orkiestrujący logikę biznesową, autoryzację JWT, transakcje bazodanowe oraz dystrybucję zdarzeń WebSocket (Goroutines).
 
-## Architektura
+- **Baza Danych (PostgreSQL 15):** Trwałe i transakcyjne przechowywanie zoptymalizowanych struktur danych mapowanych obiektowo przez GORM.
 
-- **Front-end:** Aplikacja Mobilna (rozwijana natywnie/hybrydowo poza środowiskiem kontenerów).
-- **Backend API:** Napisany w języku **Go (Golang)** – zarządza logiką biznesową i komunikacją.
-- **Baza Danych:** Relacyjna baza **PostgreSQL 15** przechowująca dane pacjentów i historię wizyt.
-- **Moduł AI:** Mikrousługa w języku **Python (FastAPI)** realizująca klasyfikację pacjentów w oparciu o parametry życiowe.
-- **DevOps & Automatyzacja:** Konteneryzacja (Docker & Docker Compose) sprzężona z mechanizmem automatycznej synchronizacji kodu źródłowego (`git-sync`).
+- **AI Core (Python / FastAPI):** Odizolowany serwis predykcyjny realizujący inferencję matematyczną (Decision Tree) na podstawie wektora parametrów życiowych pacjenta.
 
-## ⚙️ Architektura Środowiskowa (Multi-Environment Setup)
+- **Infrastruktura (Docker & Tailscale):** Pełna konteneryzacja stosu (Docker Compose) uruchomiona w architekturze Homelab, zabezpieczona siecią kratową Mesh VPN.
 
-System wspiera inteligentne, automatyczne zarządzanie źródłem danych na poziomie kodu aplikacji w Go. Zależnie od konfiguracji pliku lokalnego `.env`, backend potrafi dynamicznie przełączać się pomiędzy lokalnym kontenerem bazy danych a fizycznym serwerem zewnętrznym, bez konieczności modyfikowania pliku `docker-compose.yml`.
+## Architektura Środowiskowa (Multi-Environment Setup)
 
-### Tryby działania systemu:
+Backend w Go dynamicznie zarządza źródłem danych na podstawie zmiennych środowiskowych .env, eliminując potrzebę modyfikacji konfiguracji Docker Compose:
 
-1. **Środowisko Deweloperskie (`APP_ENV=development` na PC):** Backend komunikuje się z lokalnym kontenerem PostgreSQL (`db`) wewnątrz tej samej sieci Docker.
-2. **Środowisko Hybrydowe (`APP_ENV=production` na PC):** Lokalny backend uruchomiony na komputerze dewelopera automatycznie wykrywa brak flagi serwera i przekierowuje zapytania do produkcyjnej bazy danych na serwerze zewnętrznym (`SERVER_IP`), umożliwiając testowanie aplikacji na realnych danych bez lokalnego narzutu.
-3. **Środowisko Produkcyjne (`APP_ENV=production` oraz `IS_SERVER=true` na Serwerze):** Backend uruchomiony bezpośrednio na maszynie produkcyjnej rozpoznaje swoje środowisko docelowe i łączy się z bazą lokalnie poprzez izolowaną sieć Dockera (`db`), izolując porty przed światem zewnętrznym.
+1.  **Development (APP_ENV=development, IS_SERVER=false):** Backend i baza działają lokalnie na stacji dewelopera w tej samej sieci Docker.
 
----
+2.  **Hybrydowe (APP_ENV=production, IS_SERVER=false):** Backend uruchomiony na PC dewelopera przekierowuje zapytania SQL na zewnętrzny adres SERVER_IP (serwera domowego), umożliwiając pracę na realnych danych.
 
-## 🔐 Konfiguracja Zmiennych Środowiskowych (`.env`)
+3.  **Produkcja (APP_ENV=production, IS_SERVER=true):** Kontenery działają bezpośrednio na domowym serwerze Ubuntu, izolując porty przed ruchem WAN.
 
-Konfiguracja systemu opiera się na pliku `.env`, który jest ignorowany przez system kontroli wersji Git ze względów bezpieczeństwa. Poniżej znajdują się referencyjne wzorce konfiguracji dla obu maszyn.
+## Konfiguracja Zmiennych Środowiskowych (.env)
 
-### 💻 Plik `.env` na komputerze deweloperskim (PC)
+Wymagane jest utworzenie pliku .env w katalogu głównym projektu (zsynchronizowanego z rzeczywistymi portami i punktami końcowymi Twojego API):
 
 ```env
-# Status środowiska (development / production)
-APP_ENV=development
-IS_SERVER=false
-SERVER_IP=192.168.0.1  # Adres IP serwera Ubuntu
-
-# Autentykacja bazy danych
-DB_USER=admin
-DB_PASSWORD=twoje_lokalne_haslo
-DB_NAME=sor_system
-DB_PORT=5432
-
-# Adres URL do mikrousługi AI dla żądań Triage
-AI_SERVICE_URL=http://ai:8000/predict
-
-```
-
-### 🌐 Plik `.env` na serwerze produkcyjnym (Ubuntu)
-
-```env
-# Status środowiska produkcyjnego
 APP_ENV=production
-IS_SERVER=true          # Zabezpieczenie informujące Go, że działa na serwerze docelowym
-SERVER_IP=127.0.0.1
+IS_SERVER=true
+SERVER_IP=100.114.242.128 # Adres IP serwera w sieci Tailscale
 
-# Autentykacja bazy danych (Musi być identyczna jak na PC w trybie hybrydowym)
 DB_USER=admin
 DB_PASSWORD=silne_haslo_produkcyjne
 DB_NAME=sor_system
 DB_PORT=5432
 
-# Adres URL do mikrousługi AI dla żądań Triage
-AI_SERVICE_URL=http://ai:8000/predict
+# Adres URL do wewnętrznego punktu końcowego inferencji AI
+AI_SERVICE_URL=http://ai:8000/api/triage
+JWT_SECRET=naszSekretnyKodPodpisuJWT
 
 ```
 
 ---
 
-## 🚀 Jak uruchomić (Development & Production)
+## Szybkie Uruchomienie (Docker Compose)
 
-Wymagany zainstalowany Docker oraz Docker Compose (w nowej wersji, niewymagającej atrybutu `version` w plikach YAML).
-
-### Szybkie uruchomienie projektu
+Do uruchomienia kompletnego środowiska backendowego wymagany jest zainstalowany Docker. Projekt nie korzysta z potoków CI/CD, wdrożenia realizowane są manualnie.
 
 ```bash
-git clone [URL_TWOJEGO_REPO]
-cd system-sor
-# Skonfiguruj plik .env zgodnie z powyższym wzorcem
+
+# Sklonowanie repozytorium
+
+git clone [https://github.com/kowal45/projekt-sor-system.git](https://github.com/kowal45/projekt-sor-system.git)
+
+cd projekt-sor-system
+
+
+
+# Uruchomienie wszystkich mikroserwisów w tle
+
 docker compose up -d --build
-
 ```
 
-### 🛠️ Zarządzanie i rozwiązywanie problemów (Troubleshooting)
+### Przydatne komendy deweloperskie
 
-**Wymuszenie czystej rekompilacji backendu (po zmianach w kodzie Go):**
+- **Wymuszenie czystej rekompilacji backendu (Multi-stage Go build):**
 
-```powershell
-docker compose up -d --build backend
-
+```bash
+docker compose up -d --build sor_backend
 ```
 
-**Pełny reset bazy danych na maszynie deweloperskiej (Hard Reset wolumenów):**
-W przypadku zmiany haseł strukturalnych w `.env`, należy zresetować zainicjalizowany wolumen bazy danych PostgreSQL za pomocą flagi `-v`:
+- **Pełny reset wolumenów bazy danych (Wyczyszczenie testowych rekordów):**
 
-```powershell
+```bash
 docker compose down -v
-docker compose up -d
 
+docker compose up -d
 ```
 
-**Podgląd logów i stanu routingu bazy danych:**
+- **Podgląd logów i stanu preloading'u relacji w GORM:**
 
-```powershell
-docker logs sor_backend
-
+```bash
+docker logs -f sor_backend
 ```
 
 ---
 
-## ⚙️ Backend
+## Przepływ Klasyfikacji Medycznej (Triage)
 
-Serce systemu ESOR (Emergency Department Triage), odpowiedzialne za orkiestrację danych pomiędzy aplikacją mobilną, relacyjną bazą danych oraz zewnętrznym modułem Sztucznej Inteligencji.
+1. **Ekstrakcja i Selekcja:** Serwer Go przyjmuje parametry życiowe pacjenta z aplikacji Flutter, wyciąga datę urodzenia i oblicza wiek z bazy PostgreSQL.
 
-Backend został zaprojektowany w architekturze mikroserwisowej i napisany w języku **Go (Golang)**, co gwarantuje wysoką wydajność, bezpieczeństwo typów i minimalne zużycie zasobów (skompilowana aplikacja działa jako pojedynczy, lekki plik binarny wewnątrz kontenera Docker).
+2. **Komunikacja Blokująca:** Parametry (age, hr, sbp, dbp, pain_lvl) są serializowane do JSON i wysyłane synchronicznym żądaniem HTTP POST do kontenera sor_ai.
 
-### 🛠 Wykorzystane technologie
+3. **Inferencja ML:** FastAPI ładuje z plików .pickle strukturę drzewa decyzyjnego, wykonuje predykcję w czasie milisekundowym i zwraca kod pilności KTAS (1-5), gwarantując 100% czułości dla stanów krytycznych.
 
-- **Język:** Go 1.26 (Alpine-based compiler)
-- **Framework Webowy / Router:** Gin Gonic (szybka obsługa żądań HTTP i grupowanie ścieżek REST API)
-- **ORM:** GORM (obiektowo-relacyjne mapowanie z wykorzystaniem mechanizmu Auto-Migracji struktury bazodanowej)
-- **Baza Danych:** PostgreSQL 15
-- **Architektura:** Wieloetapowe budowanie obrazów (Multi-stage Docker build oparty o warstwę `builder` oraz produkcyjny, odchudzony obraz `alpine:latest`).
+4. **Dystrybucja Real-time:** Backend aktualizuje status pacjenta w bazie i asynchronicznie wypycha zaktualizowaną strukturę kolejki przez WebSocket (BroadcastQueue) do wszystkich paneli personelu oraz monitora poczekalni.
 
-### 📡 Przepływ danych (Logika działania)
+## Schemat bazy danych
 
-1. Backend udostępnia strukturyzowane REST API dla aplikacji mobilnej, odbierając dane medyczne w formacie JSON.
-2. Po walidacji i dynamicznym wyborze hosta bazy przez moduł `config.ConnectDatabase()`, dane (parametry życiowe, wiek, poziom bólu) są trwale zapisywane w bazie PostgreSQL.
-3. Następnie backend wykonuje wewnętrzne odpytanie (HTTP POST) do niezależnego kontenera AI (Python FastAPI), przesyłając wektor cech pacjenta.
-4. Po otrzymaniu wyliczonego priorytetu od modelu uczenia maszynowego, backend aktualizuje rekord w bazie (przydzielając odpowiedni kolor kodu Triage) i zwraca ostateczny wynik w strukturze odpowiedzi do frontendu.
+```
+└── /api
+    ├── 🔓 /auth (Trasy otwarte)
+    │   └── POST /login ──────────────────────── Logowanie personelu
+    ├── 🔓 /auth (Trasy otwarte)
+    │   └── POST /login ──────────────────────── Logowanie personelu
+    │
+    └── 🔒 / (Wymaga AuthMiddleware - JWT)
+        ├── GET /auth/me ─────────────────────── Profil zalogowanego użytkownika
+        ├── POST /auth/register ──────────────── Rejestracja pracownika [ADMIN]
+        │
+        ├── 👥 /patients (Zarządzanie kartotekami)
+        │   ├── POST /patients ───────────────── Rejestracja nowej karty pacjenta
+        │   ├── GET  /patients ───────────────── Dynamiczne filtrowanie pacjentów
+        │   ├── GET  /patients/:pesel ────────── Wyszukiwanie (PESEL)
+        │   ├── PUT  /patients/:pesel ────────── Aktualizacja danych metrykalnych
+        │   └── DELETE /patients/:pesel ──────── Usunięcie kartoteki [ADMIN, LEKARZ]
+        │
+        ├── 🏥 /admissions (Przyjęcia i Triage SOR)
+        │   ├── POST /admissions/predict-ktas ── Bezstanowa inferencja (FastAPI AI Core)
+        │   ├── POST /admissions ─────────────── Zapis karty Triage (Kolejka SOR)
+        │   ├── GET  /ws/admissions/queue ────── Strumień WebSocket (Czas rzeczywisty)
+        │   ├── GET  /admissions ─────────────── Archiwum przyjęć oddziałowych
+        │   ├── PATCH /admissions/:id/status ──── Zmiana statusu procesu obsługi
+        │   └── GET  /patients/:pesel/admissions Historyczna kartoteka wizyt pacjenta
+        │
+        └── 🩺 [LEKARZ, ADMIN] (Panel gabinetowy i diagnostyka)
+            ├── GET  /doctor/admissions ──────── Pacjenci przypisani do lekarza
+            ├── PUT  /admissions/:id/assign ──── Przejęcie pacjenta z poczekalni
+            ├── POST /consultations ──────────── Zamknięcie karty (ICD-10, wypis)
+            └── POST /diagnostic-orders ──────── Zlecenie badania (RTG, KREW, TK)
+```
