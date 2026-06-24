@@ -51,5 +51,6 @@ abstract class AdmissionRepository {
   Future<Either<String, AdmissionEntity>> createAdmission(
       TriageFormDto triageData, int priorityKtas, bool isAiPredicted);
   Future<Either<String, List<AdmissionEntity>>> getAdmissions({AdmissionStatus? status});
+  Future<Either<String, AdmissionEntity>> getAdmissionById(int id);
   Future<Either<String, void>> cancelAdmission(int id);
 }

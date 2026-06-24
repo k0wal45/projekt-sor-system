@@ -92,3 +92,26 @@ class CompleteConsultationViewModel extends _$CompleteConsultationViewModel {
     return !state.hasError;
   }
 }
+
+@riverpod
+class AdmissionDetailsViewModel extends _$AdmissionDetailsViewModel {
+  @override
+  Future<AdmissionEntity?> build(int admissionId) async {
+    final admissionRepo = ref.watch(admissionRepositoryProvider);
+    final patientRepo = ref.watch(patientRepositoryProvider);
+
+    final admissionResult = await admissionRepo.getAdmissionById(admissionId);
+
+    return admissionResult.fold((err) => throw Exception(err), (
+      admission,
+    ) async {
+      final patientResult = await patientRepo.getPatientById(
+        admission.patientId,
+      );
+      return patientResult.fold(
+        (err) => throw Exception(err),
+        (patient) => admission.copyWith(patient: patient),
+      );
+    });
+  }
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import '../view_models/auth_view_model.dart';
 
@@ -24,10 +25,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      ref.read(authViewModelProvider.notifier).login(
-            _emailController.text,
-            _passwordController.text,
-          );
+      ref
+          .read(authViewModelProvider.notifier)
+          .login(_emailController.text, _passwordController.text);
     }
   }
 
@@ -45,8 +45,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                SvgPicture.asset('assets/esor-logo.svg', width: 80.0),
+                const SizedBox(height: 16.0),
                 Text(
-                  'E-SOR Logowanie',
+                  'Logowanie dla personelu',
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -60,7 +62,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: Text(
                       authState.error.toString(),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -72,7 +76,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value == null || value.isEmpty ? 'Podaj e-mail' : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Podaj e-mail' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -82,13 +87,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     border: OutlineInputBorder(),
                   ),
                   obscureText: true,
-                  validator: (value) => value == null || value.isEmpty ? 'Podaj hasło' : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Podaj hasło' : null,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: authState.isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    minimumSize: Size(double.infinity, 56),
                   ),
                   child: authState.isLoading
                       ? const CircularProgressIndicator()
@@ -103,6 +112,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   label: const Text('Uruchom Ekran Poczekalni (TV)'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: Size(double.infinity, 56),
                   ),
                 ),
               ],

@@ -63,6 +63,7 @@ class StatusPlaceholder extends StatelessWidget {
                   color: Theme.of(context).colorScheme.outline,
                 ),
               ),
+              height: 100,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(

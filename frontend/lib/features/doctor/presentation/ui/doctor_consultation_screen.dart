@@ -1,4 +1,8 @@
 import 'package:esor/features/dashboard/presentation/view_models/my_patients_provider.dart';
+import 'package:esor/features/dashboard/presentation/widgets/patient_queue_card.dart';
+import 'package:esor/shared/widgets/custom_chip.dart';
+import 'package:esor/shared/widgets/section_header.dart';
+import 'package:esor/shared/widgets/status_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,77 +64,149 @@ class _DoctorConsultationScreenState
         .watch(completeConsultationViewModelProvider)
         .isLoading;
     final isAnyLoading = isOrdering || isCompleting;
+    final admission = ref.watch(
+      admissionDetailsViewModelProvider(widget.admissionId),
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Konsultacja - Zgłoszenie #${widget.admissionId}'),
+        title: Text('Konsultacja #${widget.admissionId}'),
+        centerTitle: false,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Zakończenie Wizyty',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _interviewController,
-              decoration: const InputDecoration(
-                labelText: 'Wywiad / Opis wizyty',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 4,
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _icd10Controller,
-              decoration: const InputDecoration(
-                labelText: 'Kod ICD-10 (Rozpoznanie)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              initialValue: _selectedDecision,
-              decoration: const InputDecoration(
-                labelText: 'Decyzja wyjściowa',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'WYPIS_DO_DOMU',
-                  child: Text('Wypis do domu'),
-                ),
-                DropdownMenuItem(
-                  value: 'HOSPITALIZACJA',
-                  child: Text('Hospitalizacja'),
-                ),
-                DropdownMenuItem(
-                  value: 'TRANSFER_NA_ODDZIAL',
-                  child: Text('Transfer na oddział'),
-                ),
-                DropdownMenuItem(value: 'ZGON', child: Text('Zgon')),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedDecision = val);
+            const SizedBox(height: 4),
+            SectionHeader(title: "Informacje o pacjencie"),
+            admission.when(
+              data: (admission) {
+                return Column(
+                  children: [
+                    PatientQueueCard(admission: admission!, onTap: () {}),
+                    SectionHeader(title: "Parametry Triage"),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: [
+                          CustomChip(text: "HR: ${admission.hr} bpm"),
+                          CustomChip(
+                            text: "BP: ${admission.sbp}/${admission.dbp} mmHg",
+                          ),
+                          CustomChip(text: "BT: ${admission.bt} C"),
+                          CustomChip(text: "RR: ${admission.rr} /min"),
+                          CustomChip(text: "Pain: ${admission.pain}/10"),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).colorScheme.errorContainer,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      child: Text("Główna skarga: ${admission.chiefComplaint}"),
+                    ),
+                    SizedBox(height: 16),
+                  ],
+                );
+              },
+              error: (err, stack) {
+                return Center(
+                  child: StatusPlaceholder(
+                    icon: Icons.error_rounded,
+                    title: "Błąd pobierania danych",
+                    errorMessage: err.toString(),
+                  ),
+                );
+              },
+              loading: () {
+                return const Center(child: CircularProgressIndicator());
               },
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: isAnyLoading ? null : _completeConsultation,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade100,
-                foregroundColor: Colors.red.shade900,
+
+            SectionHeader(title: "Zakończenie wizyty"),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextFormField(
+                controller: _interviewController,
+                decoration: const InputDecoration(
+                  labelText: 'Wywiad / Opis wizyty',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 4,
               ),
-              child: isCompleting
-                  ? const SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('ZAKOŃCZ KONSULTACJĘ'),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextFormField(
+                controller: _icd10Controller,
+                decoration: const InputDecoration(
+                  labelText: 'Diagnoza',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: DropdownButtonFormField<String>(
+                initialValue: _selectedDecision,
+                decoration: const InputDecoration(
+                  labelText: 'Decyzja wyjściowa',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'WYPIS_DO_DOMU',
+                    child: Text('Wypis do domu'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'HOSPITALIZACJA',
+                    child: Text('Hospitalizacja'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'TRANSFER_NA_ODDZIAL',
+                    child: Text('Transfer na oddział'),
+                  ),
+                  DropdownMenuItem(value: 'ZGON', child: Text('Zgon')),
+                ],
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedDecision = val);
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ElevatedButton(
+                onPressed: isAnyLoading ? null : _completeConsultation,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  minimumSize: const Size.fromHeight(56),
+                ),
+                child: isCompleting
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('ZAKOŃCZ KONSULTACJĘ'),
+              ),
             ),
           ],
         ),

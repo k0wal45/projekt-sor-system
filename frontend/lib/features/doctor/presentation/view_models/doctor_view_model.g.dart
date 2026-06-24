@@ -42,7 +42,7 @@ final class AssignPatientViewModelProvider
 }
 
 String _$assignPatientViewModelHash() =>
-    r'e9e19e96841ff084e66cd2f9f5c84b91cefe30ba';
+    r'ae805d75c80e7f976e4b773b536b9c4a135a6174';
 
 abstract class _$AssignPatientViewModel extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
@@ -220,5 +220,99 @@ abstract class _$CompleteConsultationViewModel
               Object?
             >;
     return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(AdmissionDetailsViewModel)
+final admissionDetailsViewModelProvider = AdmissionDetailsViewModelFamily._();
+
+final class AdmissionDetailsViewModelProvider
+    extends
+        $AsyncNotifierProvider<AdmissionDetailsViewModel, AdmissionEntity?> {
+  AdmissionDetailsViewModelProvider._({
+    required AdmissionDetailsViewModelFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'admissionDetailsViewModelProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$admissionDetailsViewModelHash();
+
+  @override
+  String toString() {
+    return r'admissionDetailsViewModelProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  AdmissionDetailsViewModel create() => AdmissionDetailsViewModel();
+
+  @override
+  bool operator ==(Object other) {
+    return other is AdmissionDetailsViewModelProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$admissionDetailsViewModelHash() =>
+    r'1f6c51020a1188073b51e10f5319bd06c204129b';
+
+final class AdmissionDetailsViewModelFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          AdmissionDetailsViewModel,
+          AsyncValue<AdmissionEntity?>,
+          AdmissionEntity?,
+          FutureOr<AdmissionEntity?>,
+          int
+        > {
+  AdmissionDetailsViewModelFamily._()
+    : super(
+        retry: null,
+        name: r'admissionDetailsViewModelProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  AdmissionDetailsViewModelProvider call(int admissionId) =>
+      AdmissionDetailsViewModelProvider._(argument: admissionId, from: this);
+
+  @override
+  String toString() => r'admissionDetailsViewModelProvider';
+}
+
+abstract class _$AdmissionDetailsViewModel
+    extends $AsyncNotifier<AdmissionEntity?> {
+  late final _$args = ref.$arg as int;
+  int get admissionId => _$args;
+
+  FutureOr<AdmissionEntity?> build(int admissionId);
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<AdmissionEntity?>, AdmissionEntity?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<AdmissionEntity?>, AdmissionEntity?>,
+              AsyncValue<AdmissionEntity?>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

@@ -43,7 +43,7 @@ final class PatientFormViewModelProvider
 }
 
 String _$patientFormViewModelHash() =>
-    r'5bb7614338574d29582d373306497f9b0f837ba4';
+    r'7d9c7e19901911b2736490cbb5700336c8ec12a4';
 
 abstract class _$PatientFormViewModel
     extends $Notifier<AsyncValue<PatientEntity?>> {

@@ -93,6 +93,16 @@ class AdmissionRepositoryImpl implements AdmissionRepository {
   }
 
   @override
+  Future<Either<String, AdmissionEntity>> getAdmissionById(int id) async {
+    try {
+      final response = await _dio.get('/admissions/$id');
+      return right(AdmissionEntity.fromJson(response.data));
+    } catch (e) {
+      return left('Nie udało się pobrać przyjęcia: $e');
+    }
+  }
+
+  @override
   Future<Either<String, void>> cancelAdmission(int id) async {
     try {
       await _dio.delete('/admissions/$id');

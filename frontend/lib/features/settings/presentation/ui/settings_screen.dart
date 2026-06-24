@@ -1,3 +1,4 @@
+import 'package:esor/shared/widgets/section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/theme_mode_notifier.dart';
@@ -13,10 +14,15 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ustawienia')),
+      appBar: AppBar(
+        title: const Text('Ustawienia'),
+        centerTitle: false,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
         children: [
+          SectionHeader(title: "Użytkownik"),
+          const SizedBox(height: 2),
           authState.when(
             data: (user) {
               if (user == null) {
@@ -42,19 +48,15 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Wygląd',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
+          SectionHeader(title: "Wygląd"),
+          const SizedBox(height: 2),
           Card(
+            margin: EdgeInsets.symmetric(horizontal: 16),
             child: SwitchListTile(
               title: const Text('Tryb ciemny'),
               subtitle: Text(
-                themeMode == ThemeMode.dark
-                    ? 'Aktywny'
-                    : 'Nieaktywny',
+                themeMode == ThemeMode.dark ? 'Aktywny' : 'Nieaktywny',
               ),
               secondary: Icon(
                 themeMode == ThemeMode.dark
@@ -67,15 +69,13 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Konto',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
+          SectionHeader(title: "Konto"),
+          const SizedBox(height: 2),
           Card(
+            margin: EdgeInsets.symmetric(horizontal: 16),
             child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
+              leading: const Icon(Icons.logout),
               title: const Text('Wyloguj się'),
               onTap: () {
                 ref.read(authViewModelProvider.notifier).logout();
@@ -89,6 +89,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildUserInfoCard(BuildContext context, StaffEntity user) {
     return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -97,10 +98,12 @@ class SettingsScreen extends ConsumerWidget {
             Row(
               children: [
                 CircleAvatar(
-                  radius: 28,
+                  radius: 24,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   child: Text(
                     '${user.firstName.isNotEmpty ? user.firstName[0] : ''}${user.lastName.isNotEmpty ? user.lastName[0] : ''}',
-                    style: const TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -116,8 +119,8 @@ class SettingsScreen extends ConsumerWidget {
                       Text(
                         user.role.displayName,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ],
                   ),

@@ -108,7 +108,7 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Wypełnij parametry życiowe i objawy, aby AI mogło zadziałać.',
+            'Wypełnij poprawnie parametry życiowe i objawy, aby SI mogło zadziałać.',
           ),
         ),
       );
@@ -404,8 +404,9 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                       ),
                       maxLines: 3,
                       validator: (v) {
-                        if (v == null || v.isEmpty)
+                        if (v == null || v.isEmpty) {
                           return 'Podaj główną skargę';
+                        }
                         if (v.length < 3) return 'Zbyt krótki opis';
                         return null;
                       },

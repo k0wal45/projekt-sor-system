@@ -22,7 +22,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
     final queue = ref.watch(queueViewModelProvider);
     final myPatients = ref.watch(myPatientsProvider);
 
-    void _showConfirmationDialog(BuildContext context, int admissionId) {
+    void showConfirmationDialog(BuildContext context, int admissionId) {
       showDialog(
         context: context,
         builder: (dialogContext) {
@@ -72,29 +72,47 @@ class DoctorDashboardScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        title: EsorLogo(),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              radius: 18.0,
-              child: Text(
-                user.initials,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  height: 1.0,
-                  color: Theme.of(context).colorScheme.onPrimary,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            expandedHeight: 140.0,
+            title: EsorLogo(),
+            automaticallyImplyLeading: false,
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+            scrolledUnderElevation: 0.0,
+            actions: [
+              CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                radius: 16.0,
+                child: Text(
+                  user.initials,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    height: 1.0,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16.0),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                alignment: Alignment.bottomLeft,
+                padding: const EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  bottom: 10.0,
+                ),
+                child: Text(
+                  'Dzień dobry,\nDr. ${user.lastName}',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                  ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
           SliverToBoxAdapter(child: SizedBox(height: 12.0)),
           SliverToBoxAdapter(
             child: SectionHeader(
@@ -220,7 +238,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                     return PatientQueueCard(
                       admission: admission,
                       onTap: () =>
-                          _showConfirmationDialog(context, admission.id),
+                          showConfirmationDialog(context, admission.id),
                     );
                   },
                   separatorBuilder: (context, index) =>

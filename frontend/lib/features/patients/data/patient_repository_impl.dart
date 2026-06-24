@@ -50,6 +50,16 @@ class PatientRepositoryImpl implements PatientRepository {
   }
 
   @override
+  Future<Either<String, PatientEntity>> getPatientById(int id) async {
+    try {
+      final response = await _dio.get('/patients/$id');
+      return right(PatientEntity.fromJson(response.data));
+    } catch (e) {
+      return left('Nie udało się pobrać pacjenta: $e');
+    }
+  }
+
+  @override
   Future<Either<String, void>> createPatient(PatientEntity patient) async {
     try {
       await _dio.post('/patients', data: patient.toJson());
