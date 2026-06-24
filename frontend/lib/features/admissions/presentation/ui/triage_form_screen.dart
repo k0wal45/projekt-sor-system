@@ -1,4 +1,6 @@
+import 'package:esor/core/theme/priority_colors.dart';
 import 'package:esor/features/admissions/domain/admission_entity.dart';
+import 'package:esor/shared/widgets/form_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -38,12 +40,18 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
       setState(() {
         _isLoadingPatient = false;
         result.fold(
-          (l) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Błąd pobierania pacjenta: $l'))),
+          (l) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Błąd pobierania pacjenta: $l')),
+          ),
           (patients) {
             try {
               _selectedPatient = patients.firstWhere((p) => p.id == id);
             } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nie znaleziono pacjenta o podanym ID')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Nie znaleziono pacjenta o podanym ID'),
+                ),
+              );
             }
           },
         );
@@ -53,8 +61,6 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
 
   ArrivalMode? _arrivalMode;
   MentalStatus? _mentalStatus;
-
-  final _painLevelController = TextEditingController();
   final _hrController = TextEditingController();
   final _sbpController = TextEditingController();
   final _dbpController = TextEditingController();
@@ -62,6 +68,7 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
   final _btController = TextEditingController();
   final _chiefComplaintController = TextEditingController();
 
+  double _painLevel = 0;
   bool _injury = false;
   bool _pain = false;
 
@@ -71,7 +78,6 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
   @override
   void dispose() {
     _chiefComplaintController.dispose();
-    _painLevelController.dispose();
     _hrController.dispose();
     _sbpController.dispose();
     _dbpController.dispose();
@@ -87,7 +93,7 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
       injury: _injury,
       mentalStatus: _mentalStatus!,
       pain: _pain,
-      painLevel: int.tryParse(_painLevelController.text) ?? 0,
+      painLevel: _painLevel.toInt(),
       hr: int.tryParse(_hrController.text) ?? 0,
       sbp: int.tryParse(_sbpController.text) ?? 0,
       dbp: int.tryParse(_dbpController.text) ?? 0,
@@ -137,7 +143,9 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
   Future<void> _submit() async {
     if (_selectedPatient == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Musisz wybrać pacjenta przed zapisaniem.')),
+        const SnackBar(
+          content: Text('Musisz wybrać pacjenta przed zapisaniem.'),
+        ),
       );
       return;
     }
@@ -173,30 +181,26 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
     }
   }
 
-  Color _getPriorityColor(int priority) {
-    switch (priority) {
-      case 1:
-        return Colors.red;
-      case 2:
-        return Colors.orange;
-      case 3:
-        return Colors.yellow.shade700;
-      case 4:
-        return Colors.green;
-      case 5:
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(triageFormViewModelProvider);
     final isLoading = state.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Triage - Przyjęcie Pacjenta')),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        title: const Text('Rejestracja przyjęcia'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: () {
+              _submit();
+            },
+          ),
+          SizedBox(width: 16),
+        ],
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -206,60 +210,101 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const SizedBox(height: 4),
                     if (_isLoadingPatient)
                       const Center(child: CircularProgressIndicator())
                     else if (_selectedPatient == null)
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          final result = await context.push<PatientEntity>('/patient-selection');
-                          if (result != null && mounted) {
-                            setState(() {
-                              _selectedPatient = result;
-                            });
-                          }
-                        },
-                        icon: const Icon(Icons.person_add),
-                        label: const Text('Wybierz pacjenta'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          // color: Theme.of(
+                          //   context,
+                          // ).colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            radius: 20,
+                            child: const Icon(Icons.person_search_rounded),
+                          ),
+                          title: const Text('Wybierz pacjenta z bazy'),
+                          subtitle: const Text(
+                            'Kliknij aby wyszukać lub utworzyć przyjmowanego pacjenta',
+                          ),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () async {
+                            final result = await context.push<PatientEntity>(
+                              '/patient-selection',
+                            );
+                            if (result != null && mounted) {
+                              setState(() {
+                                _selectedPatient = result;
+                              });
+                            }
+                          },
                         ),
                       )
                     else
-                      Card(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: ListTile(
-                          leading: const CircleAvatar(child: Icon(Icons.person)),
-                          title: Text('${_selectedPatient!.firstName} ${_selectedPatient!.lastName}'),
-                          subtitle: Text('PESEL: ${_selectedPatient!.pesel}'),
-                          trailing: TextButton(
-                            onPressed: () async {
-                              final result = await context.push<PatientEntity>('/patient-selection');
-                              if (result != null && mounted) {
-                                setState(() {
-                                  _selectedPatient = result;
-                                });
-                              }
-                            },
-                            child: const Text('Zmień'),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
                           ),
                         ),
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            radius: 20,
+                            child: const Icon(Icons.person_rounded),
+                          ),
+                          title: Text(
+                            '${_selectedPatient!.firstName} ${_selectedPatient!.lastName}',
+                          ),
+                          subtitle: Text('PESEL: ${_selectedPatient!.pesel}'),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () async {
+                            final result = await context.push<PatientEntity>(
+                              '/patient-selection',
+                            );
+                            if (result != null && mounted) {
+                              setState(() {
+                                _selectedPatient = result;
+                              });
+                            }
+                          },
+                        ),
                       ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Parametry życiowe i wywiad',
-                      style: Theme.of(context).textTheme.titleLarge,
+
+                    const SizedBox(height: 8),
+                    FormHeader(
+                      icon: Icons.door_back_door_outlined,
+                      title: 'Parametry Triage',
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _chiefComplaintController,
-                      decoration: const InputDecoration(
-                        labelText: 'Objawy główne (chief complaint)',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 3,
-                      validator: (v) => v!.isEmpty ? 'Wymagane' : null,
-                    ),
-                    const SizedBox(height: 16),
                     DropdownButtonFormField<ArrivalMode>(
                       initialValue: _arrivalMode,
                       decoration: const InputDecoration(
@@ -275,13 +320,40 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                           )
                           .toList(),
                       onChanged: (v) => setState(() => _arrivalMode = v),
-                      validator: (v) => v == null ? 'Wymagane' : null,
+                      validator: (v) =>
+                          v == null ? 'Wybierz formę przybycia' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Czy to uraz fizyczny?',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 4),
+                    SegmentedButton<bool>(
+                      style: SegmentedButton.styleFrom(
+                        visualDensity: const VisualDensity(
+                          horizontal: 0,
+                          vertical: 0,
+                        ),
+                        selectedBackgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.18),
+                      ),
+
+                      selected: {_injury},
+                      onSelectionChanged: (value) {
+                        setState(() => _injury = value.first);
+                      },
+                      segments: const [
+                        ButtonSegment(value: true, label: Text('Tak')),
+                        ButtonSegment(value: false, label: Text('Nie')),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<MentalStatus>(
                       initialValue: _mentalStatus,
                       decoration: const InputDecoration(
-                        labelText: 'Stan umysłowy',
+                        labelText: 'Stan świadomości',
                         border: OutlineInputBorder(),
                       ),
                       items: MentalStatus.values
@@ -293,90 +365,134 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                           )
                           .toList(),
                       onChanged: (v) => setState(() => _mentalStatus = v),
-                      validator: (v) => v == null ? 'Wymagane' : null,
+                      validator: (v) =>
+                          v == null ? 'Wybierz stan świadomości' : null,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SwitchListTile(
-                            title: const Text('Uraz'),
-                            value: _injury,
-                            onChanged: (val) => setState(() => _injury = val),
-                          ),
+                    Text(
+                      'Czy pacjent odczuwa ból?',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 4),
+                    SegmentedButton<bool>(
+                      style: SegmentedButton.styleFrom(
+                        visualDensity: const VisualDensity(
+                          horizontal: 0,
+                          vertical: 0,
                         ),
-                        Expanded(
-                          child: SwitchListTile(
-                            title: const Text('Ból'),
-                            value: _pain,
-                            onChanged: (val) => setState(() => _pain = val),
-                          ),
-                        ),
+                        selectedBackgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.18),
+                      ),
+
+                      selected: {_pain},
+                      onSelectionChanged: (value) {
+                        setState(() => _pain = value.first);
+                      },
+                      segments: const [
+                        ButtonSegment(value: true, label: Text('Tak')),
+                        ButtonSegment(value: false, label: Text('Nie')),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _chiefComplaintController,
+                      decoration: const InputDecoration(
+                        labelText: 'Główna skarga',
+                        hintText: 'Wpisz główną skargę pacjenta',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
+                      validator: (v) {
+                        if (v == null || v.isEmpty)
+                          return 'Podaj główną skargę';
+                        if (v.length < 3) return 'Zbyt krótki opis';
+                        return null;
+                      },
                     ),
                     if (_pain) ...[
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _painLevelController,
-                        decoration: const InputDecoration(
-                          labelText: 'Poziom bólu (1-10)',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (v) => v!.isEmpty ? 'Wymagane' : null,
+                      Text(
+                        'Poziom bólu (0-10)?',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Slider(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        value: _painLevel,
+                        min: 0,
+                        max: 10,
+                        divisions: 10,
+                        label: _painLevel.round().toString(),
+                        onChanged: (value) {
+                          setState(() => _painLevel = value);
+                        },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '0 - brak bólu',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall!.copyWith(fontSize: 10.0),
+                          ),
+                          Text(
+                            'Najsilniejszy ból - 10',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall!.copyWith(fontSize: 10.0),
+                          ),
+                        ],
                       ),
                     ],
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildNumberField(_hrController, 'HR (Tętno)'),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildNumberField(
-                            _rrController,
-                            'RR (Oddech)',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildNumberField(_btController, 'BT (Temp)'),
-                        ),
-                      ],
+                    FormHeader(
+                      icon: Icons.monitor_heart_outlined,
+                      title: 'Parametry życiowe',
+                    ),
+                    _buildNumberField(
+                      _btController,
+                      'Temperatura (°C)',
+                      min: 20,
+                      max: 45,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildNumberField(
-                            _sbpController,
-                            'SBP (Skurczowe)',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildNumberField(
-                            _dbpController,
-                            'DBP (Rozkurczowe)',
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 32),
-                    const Divider(),
-                    const SizedBox(height: 16),
-
-                    Text(
-                      'Ocena Priorytetu KTAS',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      textAlign: TextAlign.center,
+                    _buildNumberField(
+                      _sbpController,
+                      'Ciśnienie skurczowe (SBP)',
+                      min: 40,
+                      max: 250,
                     ),
                     const SizedBox(height: 16),
+                    _buildNumberField(
+                      _dbpController,
+                      'Ciśnienie rozkurczowe (DBP)',
+                      min: 40,
+                      max: 250,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildNumberField(
+                      _hrController,
+                      'Tętno (HR)',
+                      min: 20,
+                      max: 250,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildNumberField(
+                      _rrController,
+                      'Oddech (RR)',
+                      min: 0,
+                      max: 100,
+                    ),
+
+                    const SizedBox(height: 16),
+                    FormHeader(
+                      icon: Icons.priority_high_rounded,
+                      title: 'Priorytet przyjęcia (KTAS)',
+                    ),
 
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: List.generate(5, (index) {
                         final priority = index + 1;
                         final isSelected = _selectedPriority == priority;
@@ -388,17 +504,21 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                             });
                           },
                           child: Container(
-                            width: 50,
-                            height: 50,
+                            height: 72,
+                            width: 72,
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? _getPriorityColor(priority)
+                                  ? Theme.of(
+                                      context,
+                                    ).getPriorityContainerColor(priority)
                                   : Colors.transparent,
                               border: Border.all(
-                                color: _getPriorityColor(priority),
+                                color: Theme.of(
+                                  context,
+                                ).getPriorityColor(priority),
                                 width: 2,
                               ),
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -406,9 +526,9 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? Colors.white
-                                    : _getPriorityColor(priority),
+                                color: Theme.of(
+                                  context,
+                                ).getPriorityColor(priority),
                               ),
                             ),
                           ),
@@ -421,23 +541,20 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
                     ElevatedButton.icon(
                       onPressed: _askAi,
                       icon: const Icon(Icons.auto_awesome),
-                      label: const Text('Zasugeruj priorytet z AI'),
+                      label: const Text('Zasugeruj przy uyciu SI'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple.shade100,
-                        foregroundColor: Colors.deepPurple.shade900,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 16,
+                        ),
+                        minimumSize: const Size.fromHeight(56),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
                       ),
                     ),
-
-                    const SizedBox(height: 32),
-
-                    ElevatedButton(
-                      onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text('ZAREJESTRUJ NA SOR'),
-                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -445,7 +562,13 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
     );
   }
 
-  Widget _buildNumberField(TextEditingController controller, String label) {
+  Widget _buildNumberField(
+    TextEditingController controller,
+    String label, {
+    String? Function(String?)? validator,
+    double? min,
+    double? max,
+  }) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -453,7 +576,21 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
         border: const OutlineInputBorder(),
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      validator: (v) => v!.isEmpty ? 'Brak' : null,
+      validator:
+          validator ??
+          (v) {
+            if (v == null || v.isEmpty) return 'Podaj wartość';
+            final parsed = double.tryParse(v.replaceAll(',', '.'));
+            if (parsed == null) return 'Podaj poprawną liczbę';
+            if (min != null && parsed < min) {
+              return 'Min. wartość to ${min == min.toInt() ? min.toInt() : min}';
+            }
+            if (max != null && parsed > max) {
+              return 'Max. wartość to ${max == max.toInt() ? max.toInt() : max}';
+            }
+            if (parsed < 0) return 'Wartość nie może być ujemna';
+            return null;
+          },
     );
   }
 }

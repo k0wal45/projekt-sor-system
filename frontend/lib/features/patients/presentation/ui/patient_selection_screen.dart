@@ -1,3 +1,4 @@
+import 'package:esor/shared/utils/date_time_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,20 +15,31 @@ class PatientSelectionScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
         title: const Text('Wybierz Pacjenta'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.push('/patient-form/create');
+            },
+            icon: const Icon(Icons.person_add),
+          ),
+          SizedBox(width: 16),
+        ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
+          preferredSize: const Size.fromHeight(64),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Szukaj pacjenta (PESEL, imię, nazwisko)...',
+                hintText: 'Szukaj pacjenta po nazwisku',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
+                fillColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
                 ),
               ),
               onChanged: (val) {
@@ -36,13 +48,6 @@ class PatientSelectionScreen extends ConsumerWidget {
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push('/patient-form/create');
-        },
-        icon: const Icon(Icons.person_add),
-        label: const Text('Nowy Pacjent'),
       ),
       body: patientsState.when(
         data: (patients) {
@@ -55,20 +60,50 @@ class PatientSelectionScreen extends ConsumerWidget {
               ),
             );
           }
-          return ListView.builder(
+          return ListView.separated(
+            padding: const EdgeInsets.all(16.0),
             itemCount: patients.length,
             itemBuilder: (context, index) {
-              final patient = patients[index];
-              return ListTile(
-                leading: const CircleAvatar(
-                  child: Icon(Icons.person),
+              final p = patients[index];
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                 ),
-                title: Text('${patient.firstName} ${patient.lastName}'),
-                subtitle: Text('PESEL: ${patient.pesel}'),
-                onTap: () {
-                  context.pop(patient);
-                },
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  isThreeLine: true,
+                  leading: CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: Text(
+                      p.lastName[0].toUpperCase(),
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                  title: Text('${p.lastName} ${p.firstName}'),
+                  subtitle: Text(
+                    'PESEL: ${p.pesel}\nUr. ${DateTimeUtils.formatDate(p.birthDate)}r.',
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () {
+                    context.pop(p);
+                  },
+                ),
               );
+            },
+            separatorBuilder: (context, index) {
+              return const SizedBox(height: 8);
             },
           );
         },
