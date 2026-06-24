@@ -28,10 +28,12 @@ class PatientFormViewModel extends _$PatientFormViewModel {
         ? await repo.createPatient(patient)
         : await repo.updatePatient(patient);
 
-    state = result.fold(
-      (err) => AsyncValue.error(err, StackTrace.current),
-      (_) => AsyncValue.data(patient),
-    );
+    state = result.fold((err) => AsyncValue.error(err, StackTrace.current), (
+      _,
+    ) {
+      ref.invalidate(patientRepositoryProvider);
+      return AsyncValue.data(patient);
+    });
 
     return !state.hasError;
   }

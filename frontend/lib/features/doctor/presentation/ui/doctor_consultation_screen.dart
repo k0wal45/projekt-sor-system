@@ -32,30 +32,6 @@ class _DoctorConsultationScreenState
     super.dispose();
   }
 
-  void _orderTest() async {
-    final type = _testTypeController.text;
-    final desc = _testDescController.text;
-    if (type.isEmpty || desc.isEmpty) return;
-
-    final success = await ref
-        .read(orderDiagnosticsViewModelProvider.notifier)
-        .invoke(widget.admissionId, type, desc);
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Zlecono badanie. Status zmieniony na OCZEKUJE_NA_WYNIKI.',
-          ),
-        ),
-      );
-      _testTypeController.clear();
-      _testDescController.clear();
-      ref.invalidate(myPatientsProvider);
-      context.pop();
-    }
-  }
-
   void _completeConsultation() async {
     final interview = _interviewController.text;
     final icd10 = _icd10Controller.text;

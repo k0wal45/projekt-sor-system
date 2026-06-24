@@ -30,4 +30,29 @@ class DateTimeUtils {
 
     return (hourText, dateText);
   }
+
+  static DateTime? tryParsePolishDate(String dateStr) {
+    try {
+      final parts = dateStr.split('-');
+      if (parts.length != 3) return null;
+
+      final day = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final year = int.tryParse(parts[2]);
+
+      if (day == null || month == null || year == null) return null;
+
+      return DateTime(year, month, day);
+    } catch (_) {
+      return null; // Zwróci null zamiast wywalić aplikację
+    }
+  }
+
+  static String formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year;
+
+    return '$day.$month.$year';
+  }
 }

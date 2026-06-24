@@ -1,3 +1,4 @@
+import 'package:esor/shared/utils/date_time_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,49 +41,86 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wyszukiwarka'),
+        automaticallyImplyLeading: false,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        scrolledUnderElevation: 0.0,
+        toolbarHeight: 66.0,
+        titleSpacing: 0.0,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 4.0),
+          child: TextField(
+            onChanged: (val) {
+              ref.read(searchQueryProvider.notifier).setQuery(val);
+            },
+            decoration: InputDecoration(
+              hintText: 'Szukaj według nazwiska',
+              hintStyle: Theme.of(context).textTheme.bodyMedium,
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 12.0, right: 4.0),
+                child: const Icon(Icons.search),
+              ),
+              prefixIconConstraints: const BoxConstraints(maxWidth: 40),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  width: 1,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 0,
+              ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surface,
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              sortOrder == SortOrder.ascending
+                  ? Icons.arrow_downward_rounded
+                  : Icons.arrow_upward_rounded,
+            ),
+            tooltip: 'Sortuj',
+            onPressed: () {
+              ref.read(sortOrderProvider.notifier).toggle();
+            },
+          ),
+          const SizedBox(width: 16.0),
+        ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Pacjenci'),
-            Tab(text: 'Personel'),
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.person),
+                  SizedBox(width: 8),
+                  Text('Pacjenci'),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.badge),
+                  SizedBox(width: 8),
+                  Text('Personel'),
+                ],
+              ),
+            ),
           ],
         ),
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      labelText: 'Szukaj po nazwisku (min. 3 znaki)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: (val) {
-                      ref.read(searchQueryProvider.notifier).setQuery(val);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: Icon(
-                    sortOrder == SortOrder.ascending
-                        ? Icons.arrow_downward
-                        : Icons.arrow_upward,
-                  ),
-                  tooltip: 'Sortuj',
-                  onPressed: () {
-                    ref.read(sortOrderProvider.notifier).toggle();
-                  },
-                ),
-              ],
-            ),
-          ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -92,11 +130,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         ],
       ),
       floatingActionButton: isPatientsTab
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
+              label: const Text('Dodaj pacjenta'),
+              icon: const Icon(Icons.person_add),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
               onPressed: () {
                 context.push('/patient-form/create');
               },
-              child: const Icon(Icons.person_add),
+              heroTag: 'patient-add',
             )
           : null,
     );
@@ -116,18 +158,51 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
               if (patients.isEmpty) {
                 return const Center(child: Text('Brak wyników.'));
               }
-              return ListView.builder(
+              return ListView.separated(
+                padding: const EdgeInsets.all(16.0),
                 itemCount: patients.length,
                 itemBuilder: (context, index) {
                   final p = patients[index];
-                  return ListTile(
-                    title: Text('${p.lastName} ${p.firstName}'),
-                    subtitle: Text('PESEL: ${p.pesel}'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      context.push('/patient-form/view/${p.pesel}');
-                    },
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      isThreeLine: true,
+                      leading: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        child: Text(
+                          p.lastName[0].toUpperCase(),
+                          style: Theme.of(context).textTheme.titleSmall!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                        ),
+                      ),
+                      title: Text('${p.lastName} ${p.firstName}'),
+                      subtitle: Text(
+                        'PESEL: ${p.pesel}\nUr. ${DateTimeUtils.formatDate(p.birthDate)}r.',
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () {
+                        context.push('/patient-form/view/${p.pesel}');
+                      },
+                    ),
                   );
+                },
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 8);
                 },
               );
             },
@@ -153,15 +228,43 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
               if (staff.isEmpty) {
                 return const Center(child: Text('Brak wyników.'));
               }
-              return ListView.builder(
+              return ListView.separated(
+                padding: const EdgeInsets.all(16.0),
                 itemCount: staff.length,
                 itemBuilder: (context, index) {
                   final s = staff[index];
-                  return ListTile(
-                    title: Text('${s.lastName} ${s.firstName}'),
-                    subtitle: Text('Rola: ${s.role.displayName}'),
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 12,
+                      ),
+                      isThreeLine: true,
+                      leading: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        child: Text(
+                          s.lastName[0].toUpperCase(),
+                          style: Theme.of(context).textTheme.titleSmall!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                        ),
+                      ),
+                      title: Text('${s.lastName} ${s.firstName}'),
+                      subtitle: Text(
+                        'Rola: ${s.role.displayName}\nEmail: ${s.email}',
+                      ),
+                    ),
                   );
                 },
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),

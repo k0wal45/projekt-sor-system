@@ -1,3 +1,5 @@
+import 'package:esor/shared/utils/date_time_utils.dart';
+import 'package:esor/shared/widgets/form_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +20,8 @@ class PatientFormScreen extends ConsumerStatefulWidget {
 class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _currentMode;
+
+  final DateTime createdAt = DateTime.now();
 
   int _patientId = 0;
 
@@ -53,7 +57,9 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
   Future<void> _savePatient() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final parsedBirthDate = DateTime.tryParse(_birthDateController.text);
+    final parsedBirthDate = DateTimeUtils.tryParsePolishDate(
+      _birthDateController.text,
+    );
     if (parsedBirthDate == null) {
       ScaffoldMessenger.of(
         context,
@@ -113,14 +119,16 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
       chronicDiseases: _chronicDiseasesController.text,
     );
 
-    final success = await ref.read(patientFormViewModelProvider.notifier).savePatient(patient, _currentMode == 'create');
+    final success = await ref
+        .read(patientFormViewModelProvider.notifier)
+        .savePatient(patient, _currentMode == 'create');
 
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Zapisano pomyślnie!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Zapisano pomyślnie!')));
       if (_currentMode == 'create') {
         context.pop();
       } else {
@@ -130,9 +138,9 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
       }
     } else {
       final err = ref.read(patientFormViewModelProvider).error;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(err.toString())));
     }
   }
 
@@ -158,10 +166,14 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
   Widget build(BuildContext context) {
     final isView = _currentMode == 'view';
     final isCreate = _currentMode == 'create';
+    final isEdit = _currentMode == 'edit';
     final state = ref.watch(patientFormViewModelProvider);
 
     ref.listen(patientFormViewModelProvider, (previous, next) {
-      if (previous?.value != next.value && next.value != null && !next.isLoading && !next.hasError) {
+      if (previous?.value != next.value &&
+          next.value != null &&
+          !next.isLoading &&
+          !next.hasError) {
         final patient = next.value!;
         _patientId = patient.id;
         _peselController.text = patient.pesel;
@@ -185,6 +197,8 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        centerTitle: false,
         title: Text(
           isCreate
               ? 'Nowy Pacjent'
@@ -199,6 +213,13 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
                 setState(() => _currentMode = 'edit');
               },
             ),
+          if (isCreate || isEdit)
+            IconButton(
+              icon: const Icon(Icons.save),
+              tooltip: 'Zapisz',
+              onPressed: _savePatient,
+            ),
+          SizedBox(width: 16),
         ],
       ),
       body: state.isLoading
@@ -206,36 +227,139 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
           : state.hasError && state.value == null
           ? Center(child: Text(state.error.toString()))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
+                    FormHeader(icon: Icons.person, title: "Dane osobowe"),
+
+                    _buildField(
+                      _firstNameController,
+                      'Imię',
+                      isView,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Podaj imię';
+                        if (v.length < 2) return 'Imię musi mieć min. 2 znaki';
+                        return null;
+                      },
+                    ),
+                    _buildField(
+                      _lastNameController,
+                      'Nazwisko',
+                      isView,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Podaj nazwisko';
+                        if (v.length < 2) {
+                          return 'Nazwisko musi mieć min. 2 znaki';
+                        }
+                        return null;
+                      },
+                    ),
                     _buildField(
                       _peselController,
                       'PESEL',
                       isView,
                       readOnlyIfEdit: !isCreate,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Podaj PESEL';
+                        if (!RegExp(r'^\d{11}$').hasMatch(v)) {
+                          return 'PESEL musi składać się z 11 cyfr';
+                        }
+                        return null;
+                      },
                     ),
-                    _buildField(_firstNameController, 'Imię', isView),
-                    _buildField(_lastNameController, 'Nazwisko', isView),
                     _buildBirthDateField(isView),
                     _buildGenderDropdown(isView),
-                    _buildField(_addressController, 'Adres', isView),
-                    _buildField(_phoneController, 'Telefon', isView),
-                    _buildField(_emailController, 'Email', isView),
+
+                    FormHeader(
+                      icon: Icons.contact_phone,
+                      title: "Dane kontaktowe",
+                    ),
+                    _buildField(
+                      _phoneController,
+                      'Telefon',
+                      isView,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) {
+                          return 'Podaj numer telefonu';
+                        }
+                        final digits = v.replaceAll(RegExp(r'\s|\+|-'), '');
+                        if (!RegExp(r'^\d{9,15}$').hasMatch(digits)) {
+                          return 'Podaj poprawny numer telefonu';
+                        }
+                        return null;
+                      },
+                    ),
+                    _buildField(
+                      _emailController,
+                      'Email',
+                      isView,
+                      validator: (v) {
+                        if (v != null && v.isNotEmpty) {
+                          if (!RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          ).hasMatch(v)) {
+                            return 'Podaj poprawny adres email';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                    _buildField(
+                      _addressController,
+                      'Adres',
+                      isView,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) {
+                          return 'Podaj adres zamieszkania';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    FormHeader(
+                      icon: Icons.contact_emergency,
+                      title: "Kontakt alarmowy",
+                    ),
                     _buildField(
                       _emergencyNameController,
-                      'Imię i nazwisko osoby kontaktowej',
+                      'Imię i nazwisko',
                       isView,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) {
+                          return 'Podaj osobę do kontaktu';
+                        }
+                        return null;
+                      },
                     ),
+
                     _buildField(
                       _emergencyPhoneController,
-                      'Telefon osoby kontaktowej',
+                      'Telefon',
                       isView,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) {
+                          return 'Podaj telefon kontaktowy';
+                        }
+                        final digits = v.replaceAll(RegExp(r'\s|\+|-'), '');
+                        if (!RegExp(r'^\d{9,15}$').hasMatch(digits)) {
+                          return 'Podaj poprawny numer telefonu';
+                        }
+                        return null;
+                      },
+                    ),
+                    FormHeader(
+                      icon: Icons.medical_information,
+                      title: "Wywiad",
                     ),
                     _buildBloodGroupDropdown(isView),
-                    _buildField(_allergiesController, 'Alergie', isView),
+                    _buildField(
+                      _allergiesController,
+                      'Alergie',
+                      isView,
+                      maxLines: 3,
+                    ),
                     _buildField(
                       _chronicDiseasesController,
                       'Choroby przewlekłe',
@@ -243,15 +367,6 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
                       maxLines: 3,
                     ),
                     const SizedBox(height: 24),
-                    if (!isView)
-                      ElevatedButton.icon(
-                        onPressed: _savePatient,
-                        icon: const Icon(Icons.save),
-                        label: const Text('Zapisz dane'),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -265,6 +380,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
     bool isView, {
     bool readOnlyIfEdit = false,
     int maxLines = 1,
+    String? Function(String?)? validator,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -280,8 +396,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
               ? Theme.of(context).colorScheme.surfaceContainerHighest
               : null,
         ),
-        validator: (value) =>
-            value == null || value.isEmpty ? 'Pole nie może być puste' : null,
+        validator: validator,
       ),
     );
   }
@@ -293,7 +408,8 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
         controller: _birthDateController,
         readOnly: true,
         decoration: InputDecoration(
-          labelText: 'Data Urodzenia (YYYY-MM-DD)',
+          labelText: 'Data urodzenia',
+          helperText: 'DD-MM-YYYY',
           border: const OutlineInputBorder(),
           filled: isView,
           fillColor: isView
@@ -317,11 +433,11 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
                   final y = picked.year.toString().padLeft(4, '0');
                   final m = picked.month.toString().padLeft(2, '0');
                   final d = picked.day.toString().padLeft(2, '0');
-                  _birthDateController.text = '$y-$m-$d';
+                  _birthDateController.text = '$d-$m-$y';
                 }
               },
         validator: (value) =>
-            value == null || value.isEmpty ? 'Pole nie może być puste' : null,
+            value == null || value.isEmpty ? 'Podaj datę urodzenia' : null,
       ),
     );
   }
@@ -358,7 +474,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
             _genderController.clear();
           }
         },
-        validator: (value) => value == null ? 'Pole nie może być puste' : null,
+        validator: (value) => value == null ? 'Wybierz płeć' : null,
       ),
     );
   }
@@ -394,7 +510,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
             _bloodGroupController.clear();
           }
         },
-        validator: (value) => value == null ? 'Pole nie może być puste' : null,
+        validator: (value) => value == null ? 'Wybierz grupę krwi' : null,
       ),
     );
   }
