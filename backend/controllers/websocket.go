@@ -53,30 +53,16 @@ type AdmissionWithPatient struct {
 
 // fetchCurrentQueue pobiera aktywne przyjęcia z poczekalni (status "W_POCZEKALNI"),
 // dołącza relację pacjenta z bazy i mapuje wynik do bezpiecznej struktury eksponującej pacjenta w JSON.
-func fetchCurrentQueue() ([]AdmissionWithPatient, error) {
-	var admissions []models.Admission
+func fetchCurrentQueue() ([]models.Admission, error) {
+    var queue []models.Admission
 
-	// Pobieramy aktywne przyjęcia o statusie "W_POCZEKALNI" i dociągamy dane powiązanego pacjenta
-	err := config.DB.Preload("Patient").
-		Where("status_przyjecia = ?", models.StatusWPoczekalni).
-		Order("priority_ktas ASC, data_przyjecia ASC").
-		Find(&admissions).Error
+    // GORM automatycznie dociągnie pacjenta, a dzięki zmianie w kroku 1, Gin wyśle go w JSON
+    err := config.DB.Preload("Patient").
+        Where("status_przyjecia = ?", models.StatusWPoczekalni).
+        Order("priority_ktas ASC, data_przyjecia ASC").
+        Find(&queue).Error
 
-	if err != nil {
-		log.Printf("[GORM ERROR] Błąd podczas preloading'u relacji 'Patient': %v", err)
-		return nil, err
-	}
-
-	// Przepisujemy pobrane rekordy na strukturę DTO nadpisującą zachowanie json:"-"
-	var queue []AdmissionWithPatient
-	for _, adm := range admissions {
-		queue = append(queue, AdmissionWithPatient{
-			Admission: adm,
-			Patient:   adm.Patient, // Przypisujemy załadowane dane pacjenta
-		})
-	}
-
-	return queue, nil
+    return queue, err
 }
 
 // Funkcja pomocnicza: Pobiera i mapuje dane pod RODO dla pojedynczego ekranu TV (Nienaruszona struktura RODO)

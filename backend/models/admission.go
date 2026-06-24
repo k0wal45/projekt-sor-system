@@ -37,7 +37,7 @@ type Admission struct {
 	
 	// Powiązanie z Pacjentem (Kluczowe: dodajemy column:id_pacjenta)
 	PatientID           uint            `gorm:"column:id_pacjenta;not null" json:"id_pacjenta"`
-	Patient             Patient         `gorm:"foreignKey:PatientID;references:ID" json:"-"`
+	Patient             Patient         `gorm:"foreignKey:PatientID;references:ID" json:"patient"`
 	
 	// Powiązanie z Osobą Przyjmującą (Kluczowe: column:id_osoby_przyjmujacej)
 	TriageStaffID       uint            `gorm:"column:id_osoby_przyjmujacej;not null" json:"id_osoby_przyjmujacej"`

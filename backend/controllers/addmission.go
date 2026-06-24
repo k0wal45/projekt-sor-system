@@ -44,9 +44,7 @@ func calculateAge(birthDate time.Time) int {
 }
 
 // POST /api/admissions/predict-ktas
-// Wstępna ocena stanu pacjenta przez algorytm / model AI (Spięta z kontenerem sor_ai)
 func PredictKtas(c *gin.Context) {
-	// Struktura lokalna bez pola priority_ktas, zapobiegająca błędom walidacji braku priorytetu
 	var input struct {
 		PatientID      uint                `json:"id_pacjenta" binding:"required"`
 		ArrivalMode    models.ArrivalMode  `json:"forma_przybycia" binding:"required"`
@@ -68,7 +66,6 @@ func PredictKtas(c *gin.Context) {
 		return
 	}
 
-	// 1. Pobranie danych pacjenta z bazy w celu wyliczenia wieku (wymaganego przez model AI)
 	var patient models.Patient
 	if err := config.DB.First(&patient, input.PatientID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Nie znaleziono pacjenta o podanym ID"})
@@ -76,7 +73,6 @@ func PredictKtas(c *gin.Context) {
 	}
 	age := calculateAge(patient.DateOfBirth)
 
-	// 2. Przygotowanie payloadu dla mikrousługi FastAPI (TriageRequest)
 	aiPayload := map[string]int{
 		"age":      age,
 		"hr":       input.HR,
@@ -91,8 +87,7 @@ func PredictKtas(c *gin.Context) {
 		return
 	}
 
-	// 3. Wywołanie zewnętrznego endpointu kontenera AI po sieci mostkowej systemu Docker
-	aiServiceURL := "http://ai:8000/api/triage" // Port wewnątrz sieci to 8000 (zgodnie z definicją uvicorn/fastapi)
+	aiServiceURL := "http://ai:8000/api/triage"
 	
 	resp, err := http.Post(aiServiceURL, "application/json", bytes.NewBuffer(jsonPayload))
 	if err != nil {
@@ -101,7 +96,6 @@ func PredictKtas(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	// Obsługa błędów zwróconych przez FastAPI (np. 503 gdy brak pliku pickle lub 500)
 	if resp.StatusCode != http.StatusOK {
 		var aiError map[string]interface{}
 		json.NewDecoder(resp.Body).Decode(&aiError)
@@ -109,7 +103,6 @@ func PredictKtas(c *gin.Context) {
 		return
 	}
 
-	// 4. Dekodowanie odpowiedzi z modelu (TriageResponse)
 	var aiResponse struct {
 		PriorityLevel int `json:"priority_level"`
 	}
@@ -118,7 +111,6 @@ func PredictKtas(c *gin.Context) {
 		return
 	}
 
-	// 5. Zwrócenie danych wyjściowych w dokładnie niezmienionym formacie (zgodnym z Twoim dotychczasowym API)
 	c.JSON(http.StatusOK, gin.H{
 		"suggested_priority_ktas": aiResponse.PriorityLevel,
 		"is_ai_predicted":         true,
@@ -126,7 +118,6 @@ func PredictKtas(c *gin.Context) {
 }
 
 // POST /api/admissions
-// Ostateczny zapis karty Triage i wrzucenie pacjenta do poczekalni SOR
 func CreateAdmission(c *gin.Context) {
 	var input TriageInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -134,14 +125,12 @@ func CreateAdmission(c *gin.Context) {
 		return
 	}
 
-	// Pobranie ID zalogowanego personelu (Ratownika/Pielęgniarki) z kontekstu JWT
 	triageStaffID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd autoryzacji: Brak ID pracownika w sesji"})
 		return
 	}
 
-	// Budowanie modelu bazy danych
 	newAdmission := models.Admission{
 		PatientID:       input.PatientID,
 		TriageStaffID:   triageStaffID.(uint),
@@ -158,10 +147,9 @@ func CreateAdmission(c *gin.Context) {
 		ChiefComplaint:  input.ChiefComplaint,
 		PriorityKtas:    input.PriorityKtas,
 		IsAiPredicted:   input.IsAiPredicted,
-		StatusAdmission: models.StatusWPoczekalni, // Pacjent ląduje w kolejce oczekujących
+		StatusAdmission: models.StatusWPoczekalni,
 	}
 
-	// Omit wycina próby automatycznego mapowania asocjacji przez GORM, co blokuje powstawanie błędnych kolumn
 	if err := config.DB.Omit("Patient", "TriageStaff", "AttendingDoctor").Create(&newAdmission).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd zapisu karty przyjęcia do bazy danych: " + err.Error()})
 		return
@@ -176,11 +164,12 @@ func CreateAdmission(c *gin.Context) {
 }
 
 // GET /api/admissions/queue
-// Pobranie pacjentów oczekujących w poczekalni (Kolejka Główna)
+// ZMIANA: Dodano Preload("Patient")
 func GetQueue(c *gin.Context) {
 	var queue []models.Admission
 
-	err := config.DB.Where("status_przyjecia = ?", models.StatusWPoczekalni).
+	err := config.DB.Preload("Patient").
+		Where("status_przyjecia = ?", models.StatusWPoczekalni).
 		Order("priority_ktas ASC, data_przyjecia ASC").
 		Find(&queue).Error
 
@@ -193,14 +182,14 @@ func GetQueue(c *gin.Context) {
 }
 
 // GET /api/admissions
-// Pobranie całego archiwum i historii przyjęć z opcją filtrowania
+// ZMIANA: Dodano Preload("Patient")
 func GetAdmissions(c *gin.Context) {
 	var admissions []models.Admission
 	
 	status := c.Query("status_przyjecia")
 	ktas := c.Query("priority_ktas")
 
-	query := config.DB.Model(&models.Admission{})
+	query := config.DB.Preload("Patient").Model(&models.Admission{})
 
 	if status != "" {
 		query = query.Where("status_przyjecia = ?", status)
@@ -218,13 +207,15 @@ func GetAdmissions(c *gin.Context) {
 }
 
 // GET /api/admissions/:id
-// Pobranie szczegółowych informacji o pojedynczym przyjęciu
+// Pobranie szczegółowych informacji o pojedynczym przyjęciu z wymuszonym ładowaniem relacji Patient
 func GetAdmissionByID(c *gin.Context) {
 	id := c.Param("id")
 	var admission models.Admission
 
-	if err := config.DB.First(&admission, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Karta przyjęcia o podanym ID nie istnieje"})
+	// Budujemy zapytanie bezpośrednio na nowej instancji DB, 
+	// wskazując jawnie relację "Patient" do załadowania.
+	if err := config.DB.Unscoped().Preload("Patient").First(&admission, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Karta przyjęcia o podanym ID nie istnieje lub brak powiązanego pacjenta"})
 		return
 	}
 
@@ -232,12 +223,13 @@ func GetAdmissionByID(c *gin.Context) {
 }
 
 // GET /api/patients/:id/admissions
-// Pobranie całej historii pobytów na SOR konkretnego pacjenta
+// ZMIANA: Dodano Preload("Patient")
 func GetPatientAdmissions(c *gin.Context) {
 	patientID := c.Param("id")
 	var history []models.Admission
 
-	err := config.DB.Where("id_pacjenta = ?", patientID).
+	err := config.DB.Preload("Patient").
+		Where("id_pacjenta = ?", patientID).
 		Order("data_przyjecia DESC").
 		Find(&history).Error
 
@@ -250,7 +242,6 @@ func GetPatientAdmissions(c *gin.Context) {
 }
 
 // DELETE /api/admissions/:id
-// Anulowanie zgłoszenia / usunięcie karty z kolejki
 func CancelAdmission(c *gin.Context) {
 	id := c.Param("id")
 	var admission models.Admission
@@ -319,18 +310,17 @@ type AdmissionArchiveDTO struct {
 	PriorityKtas    int            `json:"priority_ktas"`
 	StatusAdmission string         `json:"status_przyjecia"`
 	AdmissionTime   time.Time      `json:"data_przyjecia"`
-	Patient         models.Patient `json:"pacjent"` // Pełny model pacjenta wewnątrz przyjęcia
+	Patient         models.Patient `json:"pacjent"`
 }
 
 // GET /api/admissions/history
-// Pobieranie archiwum wszystkich przyjęć wraz z pełnymi danymi pacjentów
+// ZMIANA: Usunięto błąd undefined: id oraz undefined: admission poprzez stworzenie czystego modelu query bazy danych
 func GetAdmissionsHistory(c *gin.Context) {
 	var admissions []models.Admission
 
-	// Inicjalizujemy bazowe zapytanie GORM i automatycznie ładujemy (Preload) relację Patient
-	query := config.DB.Preload("Patient")
+	// Tworzymy poprawne zapytanie bazowe, dociągające relację Patient
+	query := config.DB.Preload("Patient").Model(&models.Admission{})
 
-	// Obsługa filtrów z Query Params (jeśli frontend przesyła filtry) [cite: 487]
 	if status := c.Query("status_przyjecia"); status != "" {
 		query = query.Where("status_przyjecia = ?", status)
 	}
@@ -338,13 +328,11 @@ func GetAdmissionsHistory(c *gin.Context) {
 		query = query.Where("priority_ktas = ?", ktas)
 	}
 
-	// Pobieramy dane posortowane od najnowszych przyjęć
 	if err := query.Order("data_przyjecia DESC").Find(&admissions).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Błąd podczas pobierania archiwum przyjęć"})
 		return
 	}
 
-	// Mapujemy pobrane rekordy na strukturę oczekiwaną przez frontend
 	var response []AdmissionArchiveDTO
 	for _, adm := range admissions {
 		response = append(response, AdmissionArchiveDTO{
@@ -352,7 +340,7 @@ func GetAdmissionsHistory(c *gin.Context) {
 			PriorityKtas:    adm.PriorityKtas,
 			StatusAdmission: string(adm.StatusAdmission),
 			AdmissionTime:   adm.AdmissionTime,
-			Patient:         adm.Patient, // Zawiera imię, nazwisko, PESEL itp.
+			Patient:         adm.Patient,
 		})
 	}
 
