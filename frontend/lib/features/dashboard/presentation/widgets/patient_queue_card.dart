@@ -8,10 +8,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PatientQueueCard extends StatelessWidget {
-  const PatientQueueCard({super.key, required this.admission, this.onTap});
+  const PatientQueueCard({
+    super.key,
+    required this.admission,
+    this.onTap,
+    this.showTwoLines = false,
+  });
 
   final AdmissionEntity admission;
   final void Function()? onTap;
+  final bool showTwoLines;
 
   @override
   Widget build(BuildContext context) {
@@ -55,21 +61,27 @@ class PatientQueueCard extends StatelessWidget {
                         "${admission.patient?.firstName} ${admission.patient?.lastName}, ${StringUtils.formatAge(age)}",
                         style: theme.textTheme.bodyLarge,
                       ),
-                      const SizedBox(height: 2.0),
-                      Row(
-                        children: [
-                          PriorityChip(priority: admission.priorityKtas),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Text(
-                              admission.chiefComplaint,
-                              style: theme.textTheme.bodyMedium,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+                      !showTwoLines
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 2.0),
+                              child: Row(
+                                children: [
+                                  PriorityChip(
+                                    priority: admission.priorityKtas,
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Text(
+                                      admission.chiefComplaint,
+                                      style: theme.textTheme.bodyMedium,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ],
                   ),
                 ),

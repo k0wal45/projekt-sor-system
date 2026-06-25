@@ -62,17 +62,17 @@ class DefaultDashboardScreen extends ConsumerWidget {
                       "Pacjenci w kolejce",
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        padding: EdgeInsets.only(left: 10.0, right: 12.0),
-                      ),
-                      onPressed: () {},
-                      label: const Text("Historia"),
-                      icon: const Icon(Icons.history_rounded),
-                    ),
+                    // OutlinedButton.icon(
+                    //   style: OutlinedButton.styleFrom(
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(12.0),
+                    //     ),
+                    //     padding: EdgeInsets.only(left: 10.0, right: 12.0),
+                    //   ),
+                    //   onPressed: () {},
+                    //   label: const Text("Historia"),
+                    //   icon: const Icon(Icons.history_rounded),
+                    // ),
                   ],
                 ),
               ),

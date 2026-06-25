@@ -43,7 +43,13 @@ class AdmissionRepositoryImpl implements AdmissionRepository {
       data['is_ai_predicted'] = isAiPredicted;
 
       final response = await _dio.post('/admissions', data: data);
-      return right(AdmissionEntity.fromJson(response.data['admission']));
+
+      final Map<String, dynamic> responseData = response.data;
+      if (responseData['admission'] != null) {
+        responseData['admission']['patient'] = null;
+      }
+
+      return right(AdmissionEntity.fromJson(responseData['admission']));
     } catch (e) {
       return left('Błąd rejestracji przyjęcia: $e');
     }

@@ -101,7 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   child: authState.isLoading
                       ? const CircularProgressIndicator()
-                      : const Text('ZALOGUJ'),
+                      : const Text('Zaloguj'),
                 ),
                 const SizedBox(height: 24),
                 OutlinedButton.icon(
