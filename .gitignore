@@ -2,7 +2,7 @@
 # Dane z bazy danych & Logi kontenerów
 # ==========================================
 backend/data/
-db_data/
+data/
 *.log
 
 # ==========================================
